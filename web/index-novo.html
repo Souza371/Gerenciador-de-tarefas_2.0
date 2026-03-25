@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gerenciador de Tarefas 2.0</title>
   <link rel="stylesheet" href="styles-novo.css">
+  <!-- Bibliotecas Externas via CDN (Para não pesar no PC) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
   <!-- TELA DE LOGIN -->
@@ -57,6 +60,7 @@
       </div>
       <div class="navbar-right">
         <span id="userEmail" class="user-info"></span>
+        <button id="themeToggle" style="background:none; border:none; font-size:1.5em; cursor:pointer; margin-right:15px;" title="Alternar Tema (Dark Mode)">🌙</button>
         <button id="logoutBtn" class="btn btn-secondary btn-sm">Sair</button>
       </div>
     </nav>
@@ -105,7 +109,15 @@
         </div>
 
         <div class="recent-projects">
-          <h3>Projetos Recentes</h3>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3 style="margin: 0;">Projetos Recentes</h3>
+            <button class="btn btn-primary" onclick="gerarRelatorioPDF()" style="background-color: #e74c3c;">📄 Relatório em PDF</button>
+          </div>
+          
+          <div class="chart-container-premium">
+            <canvas id="dashboardChart"></canvas>
+          </div>
+
           <div id="projectsList" class="projects-table">
             <p class="loading">Carregando projetos...</p>
           </div>

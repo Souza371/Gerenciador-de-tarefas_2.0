@@ -248,6 +248,7 @@ async function loadDashboard() {
 
     // Carregar lista de projetos recentes
     loadProjetosRecentes();
+    setTimeout(() => window.renderChartOnDashboard(), 500);
   } catch (err) {
     console.error('Erro ao carregar dashboard:', err);
   }
@@ -610,4 +611,115 @@ window.salvarEdicaoProjeto = function() {
   window.closeModal(document.getElementById('editProjetoModal'));
   document.getElementById('editMeta').value = '';
   document.getElementById('editProgresso').value = '';
+};
+
+// ==========================================
+// ✨ LÓGICA DAS FUNÇÕES PREMIUM DA TELA
+// ==========================================
+
+// 1. TEMA ESCURO (DARK MODE)
+const themeToggle = document.getElementById('themeToggle');
+if (themeToggle) {
+  // Checa se o usuário já havia escolhido e salvo o tema no computador dele
+  const themeSalvo = localStorage.getItem('theme');
+  if (themeSalvo === 'dark') {
+    document.body.setAttribute('data-theme', 'dark');
+    themeToggle.textContent = '☀️';
+  }
+
+  themeToggle.addEventListener('click', () => {
+    const isDark = document.body.getAttribute('data-theme') === 'dark';
+    
+    // Troca o tema
+    if (isDark) {
+      document.body.removeAttribute('data-theme');
+      themeToggle.textContent = '🌙';
+      localStorage.setItem('theme', 'light');
+    } else {
+      document.body.setAttribute('data-theme', 'dark');
+      themeToggle.textContent = '☀️';
+      localStorage.setItem('theme', 'dark');
+    }
+    
+    // Recarrega o gráfico para ele trocar as cores do texto
+    if(window.renderChartOnDashboard) window.renderChartOnDashboard();
+  });
+}
+
+// 2. GERAR RELATÓRIO PDF (HTML2PDF)
+window.gerarRelatorioPDF = function() {
+  const element = document.getElementById('dashboard-section');
+  const opt = {
+    margin:       1,
+    filename:     'Relatorio_de_Obras.pdf',
+    image:        { type: 'jpeg', quality: 0.98 },
+    html2canvas:  { scale: 2, useCORS: true },
+    jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+  };
+  
+  // Mostra um alerta pra o usuário saber que tá carregando
+  showAlert('⏳ Gerando Relatório PDF em alta qualidade, aguarde...', 'info');
+  html2pdf().set(opt).from(element).save().then(() => {
+    showAlert('✅ Relatório PDF baixado com sucesso!', 'success');
+  });
+};
+
+// 3. GRÁFICOS (CHART.JS)
+let dashboardChartInstance = null;
+
+window.renderChartOnDashboard = function(dataStats) {
+  const ctx = document.getElementById('dashboardChart');
+  if (!ctx) return;
+  
+  const isDark = document.body.getAttribute('data-theme') === 'dark';
+  const textColor = isDark ? '#ffffff' : '#333333';
+  const gridColor = isDark ? '#333333' : '#e0e0e0';
+
+  if (dashboardChartInstance) {
+    dashboardChartInstance.destroy();
+  }
+
+  // Se não tivermos dados da API, usamos os dados visuais lidos ou um padrão visual para demonstração
+  const andamento = parseInt(document.getElementById('projetosEmAndamento').textContent) || 3;
+  const pendentes = parseInt(document.getElementById('atividadesPendentes').textContent) || 5;
+  const total = parseInt(document.getElementById('totalProjetos').textContent) || 8;
+  const entregues = parseInt(document.getElementById('materiaisEntregues').textContent) || 4;
+
+  dashboardChartInstance = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Em Andamento', 'Pendências', 'Finalizados', 'Fase de Planejamento'],
+      datasets: [{
+        label: 'Métricas das Obras',
+        data: [andamento, pendentes, entregues, (total - andamento)], 
+        backgroundColor: [
+          '#3498db', // Azul
+          '#e74c3c', // Vermelho
+          '#2ecc71', // Verde
+          '#f1c40f'  // Amarelo
+        ],
+        borderWidth: 1,
+        borderRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { labels: { color: textColor, font: { size: 14 } } },
+        tooltip: { boxPadding: 6 }
+      },
+      scales: {
+        y: { 
+          beginAtZero: true, 
+          ticks: { color: textColor }, 
+          grid: { color: gridColor } 
+        },
+        x: { 
+          ticks: { color: textColor }, 
+          grid: { display: false } 
+        }
+      }
+    }
+  });
 };

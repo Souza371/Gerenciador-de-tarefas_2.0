@@ -863,3 +863,82 @@ table tr:hover {
     align-items: flex-start;
   }
 }
+
+/* =========================================
+   ✨ EFEITOS PREMIUM (GLASSMORPHISM & DARK MODE)
+   ========================================= */
+
+/* Transição suave de cores para o Dark Mode */
+body, .project-card, .stat-card, .login-box, .modal-content, .navbar {
+  transition: background-color 0.4s ease, color 0.4s ease, box-shadow 0.4s ease;
+}
+
+/* Variáveis Injetadas via JS para o Tema Escuro */
+[data-theme="dark"] {
+  --bg-color: #121212;
+  --light-bg: #1e1e1e;
+  --dark-text: #f0f0f0;
+  --text-color: #bbbbbb;
+  --border-color: #333333;
+  --secondary-color: #ff9800; /* Laranja mais vibrante para contraste */
+}
+
+/* Modificações automáticas ao ativar o tema escuro */
+[data-theme="dark"] body {
+  background-color: #121212;
+  color: #fff;
+}
+
+[data-theme="dark"] .project-card,
+[data-theme="dark"] .stat-card,
+[data-theme="dark"] .login-box,
+[data-theme="dark"] .modal-content,
+[data-theme="dark"] table th,
+[data-theme="dark"] table td,
+[data-theme="dark"] .navbar {
+  background-color: #1e1e1e;
+  color: #f0f0f0;
+  border-color: #333;
+}
+
+[data-theme="dark"] .project-card p {
+  color: #bbbbbb; 
+}
+
+[data-theme="dark"] table tr:hover {
+  background-color: #2c2c2c;
+}
+
+/* Efeito de Vidro (Glassmorphism) no fundo das janeas modais */
+.modal {
+  backdrop-filter: blur(8px) saturate(150%);
+  background-color: rgba(0, 0, 0, 0.6);
+}
+
+/* Animação Apple-like nas janelas deslizando pra cima suavemente */
+.modal-content {
+  animation: slideUpGlass 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes slideUpGlass {
+  from {
+    transform: translateY(60px) scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+/* Area do Gráfico */
+.chart-container-premium {
+  background: var(--card-bg, white);
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  margin-bottom: 30px;
+  position: relative;
+  height: 350px;
+  width: 100%;
+}
