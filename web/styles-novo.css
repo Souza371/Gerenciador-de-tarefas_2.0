@@ -687,7 +687,30 @@ table tr:hover {
   grid-column: 1 / -1;
 }
 
-/* ===== UTILIDADES ===== */
+/* ===== LINKS E UTILIDADES LOGIN ===== */
+.forgot-password {
+  text-align: right;
+  margin-top: -10px;
+  margin-bottom: 20px;
+}
+
+.forgot-password a {
+  color: var(--secondary-color);
+  text-decoration: none;
+  font-size: 0.9em;
+  font-weight: 600;
+  transition: color 0.3s;
+}
+
+.forgot-password a:hover {
+  color: var(--primary-color);
+  text-decoration: underline;
+}
+
+.btn-block {
+  width: 100%;
+}
+
 .loading {
   text-align: center;
   padding: 40px;

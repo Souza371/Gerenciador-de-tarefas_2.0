@@ -54,6 +54,66 @@ function attachEventListeners() {
     });
   }
 
+  // Modal Recuperação de Senha (SMS)
+  const esqueciSenhaLink = document.getElementById('esqueciSenhaLink');
+  const recoveryModal = document.getElementById('recoveryModal');
+  const closeRecoveryModal = document.getElementById('closeRecoveryModal');
+  const sendSmsBtn = document.getElementById('sendSmsBtn');
+  const resetPasswordBtn = document.getElementById('resetPasswordBtn');
+  const stepPhone = document.getElementById('stepPhone');
+  const stepCode = document.getElementById('stepCode');
+
+  if (esqueciSenhaLink) {
+    esqueciSenhaLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      openModal(recoveryModal);
+      stepPhone.style.display = 'block';
+      stepCode.style.display = 'none';
+      document.getElementById('recoveryPhone').value = '';
+    });
+
+    closeRecoveryModal.addEventListener('click', () => {
+      closeModal(recoveryModal);
+    });
+
+    // Simular o Envio do SMS
+    sendSmsBtn.addEventListener('click', () => {
+      const phoneInput = document.getElementById('recoveryPhone').value;
+      if (phoneInput.length > 8) {
+        // Simula comunicação com a operadora
+        sendSmsBtn.textContent = 'Enviando...';
+        sendSmsBtn.style.opacity = '0.7';
+        
+        setTimeout(() => {
+          showAlert(`Código SMS enviado com sucesso para ${phoneInput}!`, 'success');
+          stepPhone.style.display = 'none';
+          stepCode.style.display = 'block';
+          sendSmsBtn.textContent = 'Enviar Código via SMS';
+          sendSmsBtn.style.opacity = '1';
+        }, 1500); // 1.5s de delay simulando o backend
+      } else {
+        showAlert('Digite um número de celular válido!', 'error');
+      }
+    });
+
+    // Finalizar troca de senha
+    resetPasswordBtn.addEventListener('click', () => {
+      const code = document.getElementById('recoveryCode').value;
+      const newPass = document.getElementById('newPassword').value;
+      
+      if (code && newPass) {
+        resetPasswordBtn.textContent = 'Redefinindo...';
+        setTimeout(() => {
+          showAlert('Senha alterada com sucesso! Você já pode entrar.', 'success');
+          closeModal(recoveryModal);
+          resetPasswordBtn.textContent = 'Redefinir e Entrar';
+        }, 1000);
+      } else {
+        showAlert('Preencha o código recebido e a nova senha.', 'error');
+      }
+    });
+  }
+
   // Navegação
   navLinks.forEach(link => {
     link.addEventListener('click', (e) => {
