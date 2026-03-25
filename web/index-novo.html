@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gerenciador de Projetos - Construção Civil</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- TELA DE LOGIN -->
+  <div id="loginScreen" class="screen active">
+    <div class="login-container">
+      <div class="login-box">
+        <div class="logo">
+          <h1>🏗️ Build Manager</h1>
+          <p>Gerenciador de Projetos de Construção</p>
+        </div>
+        
+        <form id="loginForm">
+          <div class="form-group">
+            <label for="email">E-mail</label>
+            <input type="email" id="email" placeholder="seu@email.com" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="password">Senha</label>
+            <input type="password" id="password" placeholder="Sua senha" required>
+          </div>
+          
+          <button type="submit" class="btn btn-primary">Entrar</button>
+        </form>
+        
+        <div class="login-footer">
+          <p>Contas de teste:</p>
+          <small>admin@projeto.com / Admin@2026</small><br>
+          <small>gerente@projeto.com / Gerente@123</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TELA DO DASHBOARD -->
+  <div id="dashboardScreen" class="screen">
+    <!-- NAVBAR -->
+    <nav class="navbar">
+      <div class="navbar-brand">
+        <h2>🏗️ Build Manager</h2>
+      </div>
+      <div class="navbar-center">
+        <ul class="nav-menu">
+          <li><a href="#" data-section="dashboard" class="nav-link active">Dashboard</a></li>
+          <li><a href="#" data-section="projetos" class="nav-link">Projetos</a></li>
+          <li><a href="#" data-section="atividades" class="nav-link">Atividades</a></li>
+          <li><a href="#" data-section="materiais" class="nav-link">Materiais</a></li>
+        </ul>
+      </div>
+      <div class="navbar-right">
+        <span id="userEmail" class="user-info"></span>
+        <button id="logoutBtn" class="btn btn-secondary btn-sm">Sair</button>
+      </div>
+    </nav>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <div class="main-container">
+      <!-- DASHBOARD SECTION -->
+      <section id="dashboard-section" class="section active">
+        <div class="section-header">
+          <h2>Dashboard</h2>
+          <p>Visão geral dos seus projetos</p>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon">📊</div>
+            <div class="stat-content">
+              <div class="stat-value" id="totalProjetos">0</div>
+              <div class="stat-label">Total de Projetos</div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon">⚙️</div>
+            <div class="stat-content">
+              <div class="stat-value" id="projetosEmAndamento">0</div>
+              <div class="stat-label">Em Andamento</div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon">✅</div>
+            <div class="stat-content">
+              <div class="stat-value" id="atividadesPendentes">0</div>
+              <div class="stat-label">Atividades Pendentes</div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon">📦</div>
+            <div class="stat-content">
+              <div class="stat-value" id="materiaisEntregues">0</div>
+              <div class="stat-label">Materiais Entregues</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="recent-projects">
+          <h3>Projetos Recentes</h3>
+          <div id="projectsList" class="projects-table">
+            <p class="loading">Carregando projetos...</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- PROJETOS SECTION -->
+      <section id="projetos-section" class="section">
+        <div class="section-header">
+          <h2>Meus Projetos</h2>
+          <button id="newProjectBtn" class="btn btn-primary">+ Novo Projeto</button>
+        </div>
+
+        <div class="projects-container" id="projectsContainer">
+          <p class="loading">Carregando projetos...</p>
+        </div>
+      </section>
+
+      <!-- ATIVIDADES SECTION -->
+      <section id="atividades-section" class="section">
+        <div class="section-header">
+          <h2>Atividades</h2>
+          <div class="search-bar">
+            <input type="text" id="searchActivities" placeholder="Buscar atividades..."  class="search-input">
+          </div>
+        </div>
+
+        <div class="activities-list" id="activitiesList">
+          <p class="loading">Carregando atividades...</p>
+        </div>
+      </section>
+
+      <!-- MATERIAIS SECTION -->
+      <section id="materiais-section" class="section">
+        <div class="section-header">
+          <h2>Materiais</h2>
+          <button id="newMaterialBtn" class="btn btn-primary">+ Novo Material</button>
+        </div>
+
+        <div class="materials-list" id="materialsList">
+          <p class="loading">Carregando materiais...</p>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- MODAL - NOVO PROJETO -->
+  <div id="projectModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Novo Projeto</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+      
+      <form id="projectForm" class="form">
+        <div class="form-row">
+          <div class="form-group full">
+            <label>Nome do Projeto</label>
+            <input type="text" name="nome" placeholder="Ex: Casa Residencial - Vila Mariana" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Localização</label>
+            <input type="text" name="localizacao" placeholder="Endereço" required>
+          </div>
+          <div class="form-group">
+            <label>Tipo</label>
+            <select name="tipo" required>
+              <option value="">Selecione...</option>
+              <option value="residencial">Residencial</option>
+              <option value="comercial">Comercial</option>
+              <option value="reforma">Reforma</option>
+              <option value="outro">Outro</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Data de Início</label>
+            <input type="date" name="data_inicio">
+          </div>
+          <div class="form-group">
+            <label>Data Prevista</label>
+            <input type="date" name="data_termino_prevista">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group full">
+            <label>Orçamento Total (R$)</label>
+            <input type="number" name="orcamento_total" placeholder="0.00" step="0.01">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group full">
+            <label>Descrição</label>
+            <textarea name="descricao" placeholder="Detalhes do projeto..." rows="4"></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="cancelProjectBtn">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Criar Projeto</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL - NOVO MATERIAL -->
+  <div id="materialModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Novo Material</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+      
+      <form id="materialForm" class="form">
+        <input type="hidden" name="projeto_id">
+
+        <div class="form-row">
+          <div class="form-group full">
+            <label>Nome do Material</label>
+            <input type="text" name="nome" placeholder="Ex: Cimento Portland" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Quantidade</label>
+            <input type="number" name="quantidade" placeholder="0" step="0.01" required>
+          </div>
+          <div class="form-group">
+            <label>Unidade</label>
+            <select name="unidade" required>
+              <option value="">Selecione...</option>
+              <option value="kg">kg</option>
+              <option value="m3">m³</option>
+              <option value="m2">m²</option>
+              <option value="un">Unidade</option>
+              <option value="caixa">Caixa</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Valor Unitário (R$)</label>
+            <input type="number" name="valor_unitario" placeholder="0.00" step="0.01" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Fornecedor</label>
+            <input type="text" name="fornecedor" placeholder="Nome do fornecedor">
+          </div>
+          <div class="form-group">
+            <label>Data de Entrega</label>
+            <input type="date" name="data_entrega">
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="cancelMaterialBtn">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Adicionar Material</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

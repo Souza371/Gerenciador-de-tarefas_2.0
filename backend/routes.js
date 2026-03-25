@@ -2,6 +2,13 @@ import express from 'express';
 import db from './database.js';
 import { verificarToken, verificarRole } from './auth.js';
 import { login, registrar, listarUsuarios, obterPerfil } from './controllers.js';
+import {
+  criarProjeto, listarProjetos, obterProjeto, atualizarProjeto, deletarProjeto,
+  criarFase, listarFases, atualizarFase, deletarFase,
+  criarAtividade, listarAtividades, atualizarAtividade, deletarAtividade,
+  criarMaterial, listarMateriais, atualizarMaterial, deletarMaterial,
+  obterDashboard, obterEstatisticasProjeto
+} from './projectControllers.js';
 
 const router = express.Router();
 
@@ -127,5 +134,34 @@ router.get('/dashboard/stats', verificarToken, (req, res) => {
     }
   );
 });
+
+// ====== PROJETOS - CRUD (Novo) ======
+router.post('/projetos', verificarToken, verificarRole(['admin', 'gerente', 'engenheiro']), criarProjeto);
+router.get('/projetos', verificarToken, listarProjetos);
+router.get('/projetos/:id', verificarToken, obterProjeto);
+router.put('/projetos/:id', verificarToken, verificarRole(['admin', 'gerente', 'engenheiro']), atualizarProjeto);
+router.delete('/projetos/:id', verificarToken, verificarRole(['admin', 'gerente']), deletarProjeto);
+
+// ====== FASES - CRUD ======
+router.post('/fases', verificarToken, verificarRole(['admin', 'gerente', 'engenheiro']), criarFase);
+router.get('/projetos/:projeto_id/fases', verificarToken, listarFases);
+router.put('/fases/:id', verificarToken, verificarRole(['admin', 'gerente', 'engenheiro']), atualizarFase);
+router.delete('/fases/:id', verificarToken, verificarRole(['admin', 'gerente']), deletarFase);
+
+// ====== ATIVIDADES - CRUD ======
+router.post('/atividades', verificarToken, verificarRole(['admin', 'gerente', 'engenheiro', 'tecnico']), criarAtividade);
+router.get('/fases/:fase_id/atividades', verificarToken, listarAtividades);
+router.put('/atividades/:id', verificarToken, atualizarAtividade);
+router.delete('/atividades/:id', verificarToken, verificarRole(['admin', 'gerente']), deletarAtividade);
+
+// ====== MATERIAIS - CRUD ======
+router.post('/materiais', verificarToken, verificarRole(['admin', 'gerente', 'engenheiro']), criarMaterial);
+router.get('/projetos/:projeto_id/materiais', verificarToken, listarMateriais);
+router.put('/materiais/:id', verificarToken, verificarRole(['admin', 'gerente']), atualizarMaterial);
+router.delete('/materiais/:id', verificarToken, verificarRole(['admin', 'gerente']), deletarMaterial);
+
+// ====== DASHBOARD / ESTATÍSTICAS (Novo) ======
+router.get('/dashboard', verificarToken, obterDashboard);
+router.get('/projetos/:projeto_id/estatisticas', verificarToken, obterEstatisticasProjeto);
 
 export default router;

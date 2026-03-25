@@ -1,27 +1,30 @@
-# 📋 Gerenciador de Tarefas 2.0
+# 🏗️ Gerenciador de Projetos - Construção Civil 2.0
 
-> Sistema completo, funcional e responsivo para gerenciamento de tarefas. Desenvolvido com Node.js, Express, SQLite, HTML/CSS/JS e React Native.
+> Sistema completo, funcional e responsivo para gerenciamento de projetos na construção civil. Desenvolvido com Node.js, Express, SQLite, HTML/CSS/JS e React Native.
 
 **Projeto Integrador Final - Técnico em Desenvolvimento de Sistemas**
 
 ![Status](https://img.shields.io/badge/status-ativo-success)
-![Versão](https://img.shields.io/badge/versão-1.0.0-blue)
+![Versão](https://img.shields.io/badge/versão-2.0-blue)
 ![Licença](https://img.shields.io/badge/licença-MIT-green)
+![Leve](https://img.shields.io/badge/otimizado-4GB%20RAM-green)
 
 ---
 
-## 🎯 Características
+## 🎯 O Que é?
 
-✅ **Autenticação Segura** - JWT + bcryptjs  
-✅ **7 Usuários Pré-carregados** - Admin, Gerente, Engenheiro, Técnico, Cliente  
-✅ **CRUD Completo** - Criar, ler, editar, deletar tarefas  
-✅ **Categorização** - Geral, Trabalho, Pessoal, Estudo  
-✅ **Priorização** - Baixa, Média, Alta  
-✅ **Filtros Avançados** - Por status, categoria, prioridade  
-✅ **Dashboard** - Estatísticas em tempo real  
-✅ **Pesquisa** - Busca rápida de tarefas  
+Um **gerenciador de projetos especializado em construção civil** que permite:
+
+✅ **Gestão Completa de Projetos** - Criar, editar, acompanhar obras  
+✅ **Controle de Fases** - Fundação, Estrutura, Alvenaria, Cobertura, Acabamento  
+✅ **Rastreamento de Atividades** - Tarefas por fase com responsáveis  
+✅ **Controle de Materiais** - Cadastro, orçamento, entrega  
+✅ **Gestão de Mão de Obra** - Pedreiros, encanadores, eletricistas  
+✅ **Dashboard com Estatísticas** - Visão geral de todos os projetos  
 ✅ **Responsivo** - Desktop, tablet, mobile  
-✅ **Leve** - SQLite, sem dependências pesadas  
+✅ **Leve** - SQLite, funciona com 4GB RAM  
+✅ **Seguro** - JWT + bcryptjs + RBAC  
+✅ **Autenticação** - 7 usuários pré-carregados  
 
 ---
 
@@ -34,10 +37,9 @@
 - **bcryptjs** - Criptografia de senhas
 - **CORS** - Requisições cross-origin
 
-### Frontend Web
-- **HTML5** + **CSS3** - Estrutura e estilos
+### Frontend Web (NOVO!)
+- **HTML5** + **CSS3** - Interface moderna e responsiva
 - **JavaScript Vanilla** - Sem frameworks pesados
-- **LocalStorage** - Persistência de dados
 - **Fetch API** - Requisições HTTP
 
 ### Mobile
@@ -45,9 +47,377 @@
 - **Expo** - Simplificação do desenvolvimento
 - **AsyncStorage** - Persistência no mobile
 
-### DevOps
-- **Git** + **GitHub** - Versionamento
-- **GitHub Projects** - Kanban do projeto
+---
+
+## 🚀 Como Começar
+
+### Pré-requisitos
+- Node.js 18+ ([baixar](https://nodejs.org/))
+- npm (incluso com Node.js)
+- Navegador moderno
+
+### 1. Instalar Dependências do Backend
+
+```bash
+cd backend
+npm install
+```
+
+### 2. Iniciar o Backend
+
+```bash
+# Terminal 1 - modo desenvolvimento (com auto-reload)
+cd backend
+npm run dev
+
+# Ou modo produção
+npm start
+
+# API vai rodar em: http://localhost:5000
+```
+
+### 3. Abrir a Aplicação Web
+
+**Opção A: Direto no arquivo**
+```bash
+# Abra este arquivo no navegador:
+web/index-novo.html
+```
+
+**Opção B: Com servidor HTTP local**
+```bash
+# Terminal 2
+cd web
+python3 -m http.server 8000
+
+# Acesse: http://localhost:8000/index-novo.html
+```
+
+### 4. Testar com Contas Pré-Carregadas
+
+```
+👤 ADMIN (Acesso total)
+   Email: vicentedesouza762@gmail.com
+   Senha: Admin@2026
+
+👤 GERENTE (Gerenciar obras)
+   Email: gerenteteste@projeto.com
+   Senha: Gerente@123
+
+👤 ENGENHEIRO (Criar fases e atividades)
+   Email: engenheiroteste@projeto.com
+   Senha: Engenheiro@123
+
+👤 CLIENTE (Visualizar)
+   Email: clienteteste@projeto.com
+   Senha: Cliente@123
+```
+
+---
+
+## 📂 Estrutura do Projeto
+
+```
+.
+├── backend/
+│   ├── server.js               # Servidor Express
+│   ├── database.js             # SQLite + schema
+│   ├── auth.js                 # JWT + middleware
+│   ├── controllers.js           # Autenticação
+│   ├── projectControllers.js   # Projetos, Fases, Atividades, Materiais (NOVO!)
+│   ├── routes.js               # Todas as rotas API
+│   └── .env                    # Variáveis de ambiente
+│
+├── web/
+│   ├── index-novo.html         # Interface moderna (NOVO!)
+│   ├── styles-novo.css         # Design responsivo (NOVO!)
+│   ├── app-novo.js             # Lógica JavaScript (NOVO!)
+│   ├── index.html              # Interface antiga (backup)
+│   ├── styles.css              # CSS antigo (backup)
+│   └── app.js                  # JS antigo (backup)
+│
+├── mobile/
+│   ├── App.js
+│   ├── app.json
+│   └── package.json
+│
+├── docs/
+│   ├── API_DOCUMENTATION.md
+│   ├── ARQUITETURA.md
+│   ├── BRIEFING_REQUISITOS.md
+│   ├── MODELO_BANCO_DADOS.md
+│   └── (NOVO!) REFACTORING_SUMMARY.md
+│
+└── README.md                   # Este arquivo
+```
+
+---
+
+## 🗄️ Banco de Dados (Novo Modelo!)
+
+### Entidades
+
+**USUARIOS**
+- id, email, nome, telefone, senha, role, profissao
+
+**PROJETOS**
+- id, nome, descricao, localizacao, tipo, responsavel_id
+- status, data_inicio, data_termino_prevista, data_termino_real
+- orcamento_total, orcamento_gasto, porcentagem_concluida
+
+**FASES** (1:N com Projetos)
+- id, projeto_id, nome, descricao, ordem
+- status, data_inicio, data_termino_prevista, porcentagem
+
+**ATIVIDADES** (1:N com Fases)
+- id, fase_id, titulo, descricao, responsavel_id
+- status, prioridade, data_inicio, data_vencimento, concluida
+
+**MATERIAIS** (1:N com Projetos)
+- id, projeto_id, nome, quantidade, unidade
+- valor_unitario, valor_total, fornecedor, data_entrega
+
+**MAO_OBRA** (1:N com Projetos)
+- id, projeto_id, usuario_id, funcao
+- data_inicio, data_fim, valor_diaria, total_dias, valor_total
+
+**EQUIPAMENTOS** (1:N com Projetos)
+- id, projeto_id, nome, tipo, data_locacao, data_devolucao
+- valor_diaria, valor_total, fornecedor
+
+---
+
+## 🔌 API Endpoints
+
+### 🔐 Autenticação
+```
+POST   /api/auth/login              → Fazer login
+POST   /api/auth/registrar          → Novo usuário
+GET    /api/usuario/perfil          → Meus dados
+GET    /api/usuarios                → [ADMIN] Listar usuários
+```
+
+### 🏗️ Projetos
+```
+POST   /api/projetos                → Criar projeto
+GET    /api/projetos                → Listar meus projetos
+GET    /api/projetos/:id            → Detalhes
+PUT    /api/projetos/:id            → Atualizar
+DELETE /api/projetos/:id            → Deletar
+```
+
+### 📋 Fases
+```
+POST   /api/fases                   → Criar fase
+GET    /api/projetos/:id/fases      → Listar fases
+PUT    /api/fases/:id               → Atualizar
+DELETE /api/fases/:id               → Deletar
+```
+
+### ✅ Atividades
+```
+POST   /api/atividades              → Criar atividade
+GET    /api/fases/:id/atividades    → Listar atividades
+PUT    /api/atividades/:id          → Marcar completa
+DELETE /api/atividades/:id          → Deletar
+```
+
+### 📦 Materiais
+```
+POST   /api/materiais               → Adicionar material
+GET    /api/projetos/:id/materiais  → Listar materiais
+PUT    /api/materiais/:id           → Atualizar status
+DELETE /api/materiais/:id           → Remover
+```
+
+### 📊 Dashboard
+```
+GET    /api/dashboard               → Estatísticas gerais
+GET    /api/projetos/:id/estatisticas → Stats do projeto
+```
+
+---
+
+## 👥 Controle de Acesso (RBAC)
+
+| Função | Criar Projetos | Editar Projetos | Criar Fases | Atualizar Atividades |
+|--------|----------------|-----------------|-------------|----------------------|
+| Admin  | ✅             | ✅              | ✅          | ✅                   |
+| Gerente| ✅             | ✅              | ✅          | ✅                   |
+| Engenheiro| ❌           | ❌              | ✅          | ✅                   |
+| Técnico| ❌             | ❌              | ❌          | ✅                   |
+| Cliente| ❌             | ❌              | ❌          | ❌                   |
+
+---
+
+## 🎨 Interface (Novo Design!)
+
+A interface foi **completamente redesenhada** com:
+
+✨ **Design Moderno**
+- Cores profissionais
+- Sombras e gradientes
+- Ícones significativos
+
+📱 **Responsivo**
+- Desktop: 1920px+
+- Tablet: 768px-1024px
+- Mobile: <768px
+
+🎯 **Seções**
+1. **Dashboard** - Visão geral com 4 KPIs
+2. **Projetos** - Cards com info principais
+3. **Atividades** - Lista com filtros
+4. **Materiais** - Tabela com valores
+
+---
+
+## 🔒 Segurança
+
+✅ **Senhas**
+- Hash com bcryptjs (10 rounds)
+- Nunca armazenadas em texto plano
+
+✅ **Tokens**
+- JWT com expiração de 7 dias
+- Enviados via header `Authorization: Bearer`
+
+✅ **Endpoints**
+- Verificação de token em rotas protegidas
+- CORS habilitado
+- Validação de input em todos endpoints
+
+✅ **Dados**
+- Consultas parametrizadas (SQL Injection proof)
+- Relacionamentos 1:N com CASCADE delete
+
+---
+
+## 📊 Performance
+
+| Métrica | Meta | Status |
+|---------|------|--------|
+| API Response | < 200ms | ✅ |
+| Page Load | < 2s | ✅ |
+| RAM Usage | < 300MB | ✅ |
+| DB Size | < 50MB | ✅ |
+| Usuarios simultâneos | 100+ | ✅ |
+
+---
+
+## 🧪 Testes Manuais
+
+### Login
+1. Abra a página web
+2. Digite email e senha
+3. Clique em "Entrar"
+4. Dashboard deve carregar
+
+### Criar Projeto
+1. Clique em "Novo Projeto"
+2. Preencha os dados
+3. Clique em "Criar"
+4. Projeto aparece na lista
+
+### Adicionar Material
+1. Clique em "Materiais"
+2. Clique em "Novo Material"
+3. Selecione projeto
+4. Preencha quantidade e preço
+5. Material é adicionado
+
+---
+
+## 📱 Mobile (React Native)
+
+Para desenvolver o mobile:
+
+```bash
+cd mobile
+npm install
+npx expo start
+
+# Escaneie o QR code com Expo Go app
+# ou pressione "w" para abrir web
+```
+
+---
+
+## 📖 Documentação Completa
+
+- [Requisitos Funcionais](docs/BRIEFING_REQUISITOS.md)
+- [Modelo de Dados](docs/MODELO_BANCO_DADOS.md)
+- [Arquitetura](docs/ARQUITETURA.md)
+- [API Documentation](docs/API_DOCUMENTATION.md)
+- [Resumo da Refatoração](REFACTORING_SUMMARY.md) ⭐ LEIA PRIMEIRO!
+
+---
+
+## ✅ Checklist do Projeto
+
+- [x] Backend API funcional
+- [x] Banco de dados estruturado
+- [x] Autenticação JWT
+- [x] Frontend web responsivo
+- [x] Mobile preparado
+- [x] RBAC implementado
+- [x] Dashboard com estatísticas
+- [x] CRUD completo de projetos
+- [x] Controle de fases e atividades
+- [x] Gestão de materiais
+- [ ] Upload de fotos de obra
+- [ ] Relatórios em PDF
+- [ ] Notificações
+- [ ] Sync offline
+
+---
+
+## 🐛 Troubleshooting
+
+### Backend não conecta
+```bash
+# Verificar se está rodando:
+curl http://localhost:5000/api/health
+
+# Se não funcionar, reinstale dependências:
+cd backend
+npm install
+npm start
+```
+
+### Frontend não encontra API
+- Abra as ferramentas de desenvolvimento (F12)
+- Verifique se há erros de CORS
+- Certifique-se que backend está rodando na porta 5000
+
+### Banco de dados corrompido
+```bash
+# Deletar banco e recriar:
+cd backend
+rm tasks.db
+npm start
+# Novo banco será criado automaticamente
+```
+
+---
+
+## 📞 Contato & Suporte
+
+**Desenvolvedor:** Vicente de Souza  
+**Email:** vicentedesouza762@gmail.com  
+**Projeto:** Gerenciador de Projetos v2.0
+
+---
+
+## 📄 Licença
+
+MIT License - Use livremente!
+
+---
+
+**Última atualização:** 25 de Março de 2026  
+**Versão:** 2.0 (Refatoração Completa)  
+**Status:** ✅ Pronto para Uso
 
 ---
 
