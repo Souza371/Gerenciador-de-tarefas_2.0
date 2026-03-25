@@ -6,11 +6,11 @@
 }
 
 :root {
-  --primary-color: #2c3e50;
-  --secondary-color: #3498db;
+  --primary-color: #d35400; /* Laranja da construção */
+  --secondary-color: #e67e22; /* Laranja mais claro */
   --success-color: #27ae60;
   --danger-color: #e74c3c;
-  --warning-color: #f39c12;
+  --warning-color: #f1c40f; /* Amarelo da construção */
   --light-bg: #ecf0f1;
   --dark-text: #2c3e50;
   --border-color: #bdc3c7;
@@ -37,8 +37,14 @@ html, body {
 }
 
 /* ===== LOGIN ===== */
+#loginScreen.active {
+  display: flex !important;
+}
+
 #loginScreen {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: none;
+  background: linear-gradient(rgba(202, 70, 0, 0.7), rgba(202, 70, 0, 0.8)), url('https://images.unsplash.com/photo-1541888081622-3a808e0018e6?q=80&w=2000&auto=format&fit=crop') no-repeat center center;
+  background-size: cover;
   align-items: center;
   justify-content: center;
   flex-direction: column;
@@ -47,12 +53,13 @@ html, body {
 
 .login-container {
   width: 100%;
-  max-width: 500px;
+  max-width: 550px;
   padding: 20px;
 }
 
 .login-box {
-  background: white;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
   border-radius: 12px;
   padding: 40px;
   box-shadow: var(--shadow-lg);
@@ -106,11 +113,24 @@ html, body {
 
 .login-footer {
   text-align: center;
-  margin-top: 30px;
-  padding-top: 20px;
-  border-top: 1px solid var(--light-bg);
-  font-size: 0.95em;
-  color: #7f8c8d;
+  margin-top: 20px;
+  padding: 15px;
+  background: rgba(245, 247, 250, 0.8);
+  border-radius: 8px;
+  font-size: 0.9em;
+  color: #333;
+}
+
+.accounts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 10px;
+  text-align: left;
+}
+
+.accounts-grid small {
+  display: block;
 }
 
 /* ===== BOTÕES ===== */
@@ -217,17 +237,23 @@ html, body {
 }
 
 /* ===== MAIN CONTAINER ===== */
+#dashboardScreen.active {
+  display: flex !important;
+}
+
 #dashboardScreen {
-  display: flex;
+  display: none;
   flex-direction: column;
   height: 100vh;
+  background: linear-gradient(rgba(245, 247, 250, 0.85), rgba(245, 247, 250, 0.95)), url('https://images.unsplash.com/photo-1503387762-592deb58ef4e?q=80&w=2000&auto=format&fit=crop') no-repeat center center;
+  background-size: cover;
 }
 
 .main-container {
   flex: 1;
   overflow-y: auto;
   padding: 30px;
-  background-color: #f5f7fa;
+  background-color: transparent;
 }
 
 /* ===== SEÇÕES ===== */
