@@ -351,8 +351,8 @@ function renderProjetos() {
         </div>
 
         <div class="project-actions">
-          <button class="btn btn-secondary" onclick="event.stopPropagation(); window.abrirModalFotos(this.dataset.id)" data-id="${proj.id}">📷 Fotos/Docs</button>
-          <button class="btn btn-primary" onclick="event.stopPropagation(); window.abrirModalEdicao(this.dataset.id)" data-id="${proj.id}">✏️ Editar</button>
+          <button class="btn btn-secondary" onclick="event.stopPropagation(); window.abrirModalFotos(this.dataset.id)" data-id="${p.id}">📷 Fotos/Docs</button>
+          <button class="btn btn-primary" onclick="event.stopPropagation(); window.abrirModalEdicao(this.dataset.id)" data-id="${p.id}">✏️ Editar</button>
         </div>
       </div>
     `;
