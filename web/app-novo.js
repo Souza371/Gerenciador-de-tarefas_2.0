@@ -285,6 +285,7 @@ async function loadProjetosRecentes() {
             <th>Localização</th>
             <th>Status</th>
             <th>Andamento</th>
+            <th>Ações</th>
           </tr>
         </thead>
         <tbody>
@@ -302,6 +303,7 @@ async function loadProjetosRecentes() {
             </div>
             ${p.porcentagem_concluida || 0}%
           </td>
+          <td><button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px; margin: 0; display: inline-block;" onclick="gerarRelatorioProjeto(${p.id})" title="Baixar PDF apenas deste projeto">📄 Relatório</button></td>
         </tr>
       `;
     });
@@ -360,6 +362,7 @@ function renderProjetos() {
 
         <div class="project-actions">
           <button class="btn btn-secondary" onclick="event.stopPropagation(); window.abrirModalFotos(this.dataset.id)" data-id="${p.id}">📷 Fotos/Docs</button>
+          <button class="btn btn-secondary" onclick="event.stopPropagation(); gerarRelatorioProjeto(${p.id})">📄 Relatório</button>
           <button class="btn btn-primary" onclick="event.stopPropagation(); window.abrirModalEdicao(this.dataset.id)" data-id="${p.id}">✏️ Editar</button>
         </div>
       </div>
@@ -594,15 +597,20 @@ window.abrirModalEdicao = function(projId) {
   const projeto = projetos.find(p => p.id == projId);
   const modal = document.getElementById('editProjetoModal');
   
-  // Preencher dados atuais
   if(projeto) {
-    document.getElementById('editProgresso').value = projeto.porcentagem_concluida || 0;
-    document.getElementById('editOrcamento').value = projeto.orcamento_gasto || '';
-    document.getElementById('editMeta').value = projeto.descricao || '';
+    if(document.getElementById('editNome')) document.getElementById('editNome').value = projeto.nome || '';
+    if(document.getElementById('editLocalizacao')) document.getElementById('editLocalizacao').value = projeto.localizacao || '';
+    if(document.getElementById('editTipo')) document.getElementById('editTipo').value = projeto.tipo || '';
+    if(document.getElementById('editDataInicio')) document.getElementById('editDataInicio').value = projeto.data_inicio ? projeto.data_inicio.split('T')[0] : '';
+    if(document.getElementById('editDataPrevista')) document.getElementById('editDataPrevista').value = projeto.data_termino_prevista ? projeto.data_termino_prevista.split('T')[0] : '';
+    if(document.getElementById('editOrcamentoTotal')) document.getElementById('editOrcamentoTotal').value = projeto.orcamento_total || '';
+
+    if(document.getElementById('editProgresso')) document.getElementById('editProgresso').value = projeto.porcentagem_concluida || 0;
+    if(document.getElementById('editOrcamento')) document.getElementById('editOrcamento').value = projeto.orcamento_gasto || '';
+    if(document.getElementById('editMeta')) document.getElementById('editMeta').value = projeto.descricao || '';
+    
     const statusEl = document.getElementById('editStatus');
-    if(statusEl && projeto.status) {
-        statusEl.value = projeto.status;
-    }
+    if(statusEl && projeto.status) statusEl.value = projeto.status;
   }
 
   modal.classList.add('active');
@@ -617,55 +625,65 @@ window.salvarEdicaoProjeto = async function() {
   const meta = document.getElementById('editMeta').value;
   const progresso = document.getElementById('editProgresso').value;
   const statusEl = document.getElementById('editStatus');
-  const statusDesc = statusEl ? statusEl.value : null;
   const orcamentoEl = document.getElementById('editOrcamento');
-  let orcamento = orcamentoEl ? orcamentoEl.value : null;
+  
+  const nomeEl = document.getElementById('editNome');
+  const localizacaoEl = document.getElementById('editLocalizacao');
+  const tipoEl = document.getElementById('editTipo');
+  const dataInicioEl = document.getElementById('editDataInicio');
+  const dataPrevistaEl = document.getElementById('editDataPrevista');
+  const orcamentoTotalEl = document.getElementById('editOrcamentoTotal');
 
   if(projetoEditandoId) {
     const projeto = projetos.find(p => p.id == projetoEditandoId);
     if(projeto) {
       const payload = {
-        nome: projeto.nome, // Enviando os dados existentes se nao editou
+        nome: nomeEl && nomeEl.value ? nomeEl.value : projeto.nome,
         descricao: meta ? meta : projeto.descricao, 
-        status: statusDesc ? statusDesc : projeto.status,
+        localizacao: localizacaoEl && localizacaoEl.value ? localizacaoEl.value : projeto.localizacao,
+        tipo: tipoEl && tipoEl.value ? tipoEl.value : projeto.tipo,
+        data_inicio: dataInicioEl && dataInicioEl.value ? dataInicioEl.value : projeto.data_inicio,
+        data_termino_prevista: dataPrevistaEl && dataPrevistaEl.value ? dataPrevistaEl.value : projeto.data_termino_prevista,
+        orcamento_total: orcamentoTotalEl && orcamentoTotalEl.value ? parseFloat(orcamentoTotalEl.value) : projeto.orcamento_total,
+        status: statusEl && statusEl.value ? statusEl.value : projeto.status,
         porcentagem_concluida: progresso ? parseInt(progresso) : projeto.porcentagem_concluida,
-        orcamento_gasto: orcamento ? parseFloat(orcamento) : projeto.orcamento_gasto,
+        orcamento_gasto: orcamentoEl && orcamentoEl.value ? parseFloat(orcamentoEl.value) : projeto.orcamento_gasto,
         data_termino_real: projeto.data_termino_real
       };
 
       try {
-        const response = await fetch(`${API_URL}/projetos/${projetoEditandoId}`, {
+        const response = await fetch(, {
           method: 'PUT',
           headers: {
-            'Authorization': `Bearer ${authToken}`,
+            'Authorization': ,
             'Content-Type': 'application/json'
           },
           body: JSON.stringify(payload)
         });
 
         if (response.ok) {
-          // Atualiza na view local
+          projeto.nome = payload.nome;
+          projeto.localizacao = payload.localizacao;
+          projeto.tipo = payload.tipo;
+          projeto.data_inicio = payload.data_inicio;
+          projeto.data_termino_prevista = payload.data_termino_prevista;
+          projeto.orcamento_total = payload.orcamento_total;
           projeto.porcentagem_concluida = payload.porcentagem_concluida;
           projeto.status = payload.status;
           projeto.descricao = payload.descricao;
           projeto.orcamento_gasto = payload.orcamento_gasto;
           
           renderProjetos();
-          loadDashboard(); // Recarrega gráficos se alterar algo
-          showAlert(`✅ Informações e progresso atualizados com sucesso no banco!`, 'success');
+          loadDashboard(); 
         } else {
-          showAlert(`❌ Erro ao atualizar os dados do banco!`, 'error');
         }
       } catch (err) {
-        showAlert(`❌ Erro na conexão para atualizar o projeto.`, 'error');
+        showAlert(, 'error');
       }
     }
   }
 
   window.closeModal(document.getElementById('editProjetoModal'));
-  document.getElementById('editMeta').value = '';
-  document.getElementById('editProgresso').value = '';
-  if (orcamentoEl) orcamentoEl.value = '';
 };
 
 // ==========================================
@@ -776,5 +794,54 @@ window.renderChartOnDashboard = function(dataStats) {
         }
       }
     }
+  });
+};
+
+window.gerarRelatorioProjeto = function(projId) {
+  const p = projetos.find(proj => proj.id == projId);
+  if (!p) {
+    showAlert('Projeto não encontrado!', 'error');
+    return;
+  }
+  
+  // Creates a temporary div to render the report
+  const content = document.createElement('div');
+  content.innerHTML = `
+    <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+      <h1 style="color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px;">Relatório de Projeto</h1>
+      <h2>${p.nome}</h2>
+      <p><strong>📍 Localização:</strong> ${p.localizacao}</p>
+      <p><strong>Tipo:</strong> ${p.tipo}</p>
+      <p><strong>Status:</strong> ${p.status}</p>
+      <p><strong>Progresso:</strong> ${p.porcentagem_concluida || 0}%</p>
+      
+      <div style="margin-top: 20px; padding: 15px; border-left: 4px solid #3498db; background-color: #f8f9fa;">
+        <h3 style="margin-top: 0; color: #2980b9;">Financeiro</h3>
+        <p><strong>Orçamento Total:</strong> R$ ${(p.orcamento_total || 0).toFixed(2)}</p>
+        <p><strong>Orçamento Gasto:</strong> R$ ${(p.orcamento_gasto || 0).toFixed(2)}</p>
+      </div>
+      
+      <div style="margin-top: 20px;">
+        <h3 style="color: #2980b9;">Descrição/Meta Atual</h3>
+        <p>${p.descricao || 'Nenhuma descrição fornecida.'}</p>
+      </div>
+
+      <div style="margin-top: 40px; font-size: 12px; color: #7f8c8d; text-align: center; border-top: 1px solid #eee; padding-top: 10px;">
+        Gerado pelo Gerenciador de Tarefas 2.0 em ${new Date().toLocaleDateString('pt-BR')}
+      </div>
+    </div>
+  `;
+
+  const opt = {
+    margin:       10,
+    filename:     `Relatorio_${p.nome.replace(/\s+/g, '_')}.pdf`,
+    image:        { type: 'jpeg', quality: 0.98 },
+    html2canvas:  { scale: 2 },
+    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
+
+  showAlert('⏳ Gerando relatório PDF...', 'info');
+  html2pdf().set(opt).from(content).save().then(() => {
+    showAlert('✅ Relatório baixado com sucesso!', 'success');
   });
 };

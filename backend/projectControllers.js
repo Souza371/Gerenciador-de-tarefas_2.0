@@ -62,12 +62,20 @@ export const obterProjeto = (req, res) => {
 
 export const atualizarProjeto = (req, res) => {
   const { id } = req.params;
-  const { nome, descricao, status, porcentagem_concluida, orcamento_gasto, data_termino_real } = req.body;
+  const { 
+    nome, descricao, localizacao, tipo, data_inicio, data_termino_prevista, orcamento_total,
+    status, porcentagem_concluida, orcamento_gasto, data_termino_real 
+  } = req.body;
 
   db.run(
-    `UPDATE projetos SET nome=?, descricao=?, status=?, porcentagem_concluida=?, orcamento_gasto=?, data_termino_real=?, atualizado_em=CURRENT_TIMESTAMP
+    `UPDATE projetos SET 
+      nome=?, descricao=?, localizacao=?, tipo=?, data_inicio=?, data_termino_prevista=?, orcamento_total=?,
+      status=?, porcentagem_concluida=?, orcamento_gasto=?, data_termino_real=?, atualizado_em=CURRENT_TIMESTAMP
      WHERE id = ?`,
-    [nome, descricao, status, porcentagem_concluida, orcamento_gasto, data_termino_real, id],
+    [
+      nome, descricao, localizacao, tipo, data_inicio, data_termino_prevista, orcamento_total,
+      status, porcentagem_concluida, orcamento_gasto, data_termino_real, id
+    ],
     function(err) {
       if (err) return res.status(500).json({ erro: 'Erro ao atualizar projeto' });
       if (this.changes === 0) return res.status(404).json({ erro: 'Projeto não encontrado' });

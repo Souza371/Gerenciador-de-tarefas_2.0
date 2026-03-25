@@ -363,15 +363,49 @@
 
   <!-- Modal: Editar Obra -->
   <div id="editProjetoModal" class="modal">
-    <div class="modal-content" style="max-width: 500px;">
+    <div class="modal-content" style="max-width: 600px; max-height: 90vh; overflow-y: auto;">
       <div class="modal-header">
         <h3>✏️ Editar Informações do Projeto</h3>
         <button type="button" class="modal-close" onclick="closeModal(document.getElementById('editProjetoModal'))">×</button>
       </div>
       <div class="modal-body">
         <div class="form-row">
+          <div class="form-group full">
+            <label>Nome do Projeto</label>
+            <input type="text" id="editNome" placeholder="Ex: Casa Residencial - Vila Mariana" required>
+          </div>
+        </div>
+
+        <div class="form-row">
           <div class="form-group">
-            <label title="Atualize a barra de porcentagem geral do projeto.">Progresso da Obra (%)</label>
+            <label>Localização</label>
+            <input type="text" id="editLocalizacao" placeholder="Endereço" required>
+          </div>
+          <div class="form-group">
+            <label>Tipo</label>
+            <select id="editTipo" required>
+              <option value="residencial">Residencial</option>
+              <option value="comercial">Comercial</option>
+              <option value="reforma">Reforma</option>
+              <option value="outro">Outro</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Data de Início</label>
+            <input type="date" id="editDataInicio">
+          </div>
+          <div class="form-group">
+            <label>Data Prevista</label>
+            <input type="date" id="editDataPrevista">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label title="Atualize a barra de porcentagem geral do projeto.">Progresso (%)</label>
             <input type="number" id="editProgresso" placeholder="Ex: 50" min="0" max="100">
           </div>
           <div class="form-group">
@@ -381,13 +415,22 @@
               <option value="Atrasado">Atrasado</option>
               <option value="Concluído">Concluído</option>
               <option value="Cancelado">Cancelado</option>
+              <option value="planejamento">Planejamento</option>
             </select>
           </div>
         </div>
-        <div class="form-group">
-          <label title="Digite um novo orçamento se os custos aumentaram.">Novo Orçamento Gasto (R$)</label>
-          <input type="number" step="0.01" id="editOrcamento" placeholder="Ex: 150000.00">
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label title="Orçamento disponível para toda a obra.">Orçamento Total (R$)</label>
+            <input type="number" step="0.01" id="editOrcamentoTotal" placeholder="Ex: 500000.00">
+          </div>
+          <div class="form-group">
+            <label title="Digite o orçamento gasto da obra até aqui.">Orçamento Gasto (R$)</label>
+            <input type="number" step="0.01" id="editOrcamento" placeholder="Ex: 150000.00">
+          </div>
         </div>
+
         <div class="form-group">
           <label title="Descrição geral do que está sendo focado no momento.">Nova Meta / Descrição Breve</label>
           <input type="text" id="editMeta" placeholder="Descrição do foco atual">
