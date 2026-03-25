@@ -42,6 +42,18 @@ function attachEventListeners() {
   loginForm.addEventListener('submit', handleLogin);
   logoutBtn.addEventListener('click', handleLogout);
 
+  // Toggle Password Visibilidade
+  const togglePasswordBtn = document.getElementById('togglePassword');
+  if (togglePasswordBtn) {
+    togglePasswordBtn.addEventListener('click', () => {
+      const passwordInput = document.getElementById('password');
+      const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+      passwordInput.setAttribute('type', type);
+      // Muda a carinha do macaco! 🙈 = escondido, 🐵 = visível
+      togglePasswordBtn.textContent = type === 'password' ? '🙈' : '🐵';
+    });
+  }
+
   // Navegação
   navLinks.forEach(link => {
     link.addEventListener('click', (e) => {
