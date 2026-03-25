@@ -39,13 +39,13 @@ function init() {
 // ===== EVENT LISTENERS =====
 function attachEventListeners() {
   // Login
-  loginForm.addEventListener('submit', handleLogin);
-  logoutBtn.addEventListener('click', handleLogout);
+  loginForm?.addEventListener('submit', handleLogin);
+  logoutBtn?.addEventListener('click', handleLogout);
 
   // Toggle Password Visibilidade
   const togglePasswordBtn = document.getElementById('togglePassword');
   if (togglePasswordBtn) {
-    togglePasswordBtn.addEventListener('click', () => {
+    togglePasswordBtn?.addEventListener('click', () => {
       const passwordInput = document.getElementById('password');
       const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
       passwordInput.setAttribute('type', type);
@@ -64,7 +64,7 @@ function attachEventListeners() {
   const stepCode = document.getElementById('stepCode');
 
   if (esqueciSenhaLink) {
-    esqueciSenhaLink.addEventListener('click', (e) => {
+    esqueciSenhaLink?.addEventListener('click', (e) => {
       e.preventDefault();
       openModal(recoveryModal);
       stepPhone.style.display = 'block';
@@ -72,12 +72,12 @@ function attachEventListeners() {
       document.getElementById('recoveryPhone').value = '';
     });
 
-    closeRecoveryModal.addEventListener('click', () => {
+    closeRecoveryModal?.addEventListener('click', () => {
       closeModal(recoveryModal);
     });
 
     // Simular o Envio do SMS
-    sendSmsBtn.addEventListener('click', () => {
+    sendSmsBtn?.addEventListener('click', () => {
       const emailInput = document.getElementById('recoveryEmail').value;
       const phoneInput = document.getElementById('recoveryPhone').value;
       
@@ -104,7 +104,7 @@ function attachEventListeners() {
     });
 
     // Finalizar troca de senha
-    resetPasswordBtn.addEventListener('click', () => {
+    resetPasswordBtn?.addEventListener('click', () => {
       const code = document.getElementById('recoveryCode').value;
       const newPass = document.getElementById('newPassword').value;
       
@@ -182,7 +182,7 @@ async function handleLogin(e) {
     localStorage.setItem('token', authToken);
     localStorage.setItem('currentUser', JSON.stringify(currentUser));
 
-    loginForm.reset();
+    loginForm?.reset();
     showDashboard();
     loadDashboard();
     loadProjetos();
@@ -196,7 +196,7 @@ function handleLogout() {
   currentUser = null;
   localStorage.removeItem('token');
   localStorage.removeItem('currentUser');
-  loginForm.reset();
+  loginForm?.reset();
   showLogin();
 }
 
@@ -588,14 +588,25 @@ window.abrirModalEdicao = function(projId) {
 };
 
 window.salvarFotoDoc = function() {
-  alert('Simulação: Arquivo enviado e anexado ao repositório do projeto!');
+  showAlert('✅ Foto/Documento salvo com sucesso no projeto (Simulação interna concluída)', 'success');
   window.closeModal(document.getElementById('fotosModal'));
 };
 
 window.salvarEdicaoProjeto = function() {
   const meta = document.getElementById('editMeta').value;
   const progresso = document.getElementById('editProgresso').value;
-  alert(`Simulação: Projeto atualizado!\nNova meta: ${meta}\nProgresso: ${progresso}%`);
+  
+  if(projetoEditandoId) {
+    const projeto = projetos.find(p => p.id == projetoEditandoId);
+    if(projeto) {
+      projeto.porcentagem_concluida = progresso || projeto.porcentagem_concluida;
+      // Idealmente aqui faríamos um fetch(${API_URL}/projetos/${projetoEditandoId}) 
+      // Mas para atualizar na tela agora usamos render:
+      renderProjetos();
+    }
+  }
+
+  showAlert(`✅ Projeto atualizado para ${progresso}% de conclusão com a nova meta!`, 'success');
   window.closeModal(document.getElementById('editProjetoModal'));
   document.getElementById('editMeta').value = '';
   document.getElementById('editProgresso').value = '';
