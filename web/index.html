@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gerenciador de Tarefas 2.0</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Tela de Login -->
+    <div id="loginScreen" class="screen active">
+      <div class="login-container">
+        <div class="login-box">
+          <h1>📋 Gerenciador de Tarefas 2.0</h1>
+          <p class="subtitle">Organize suas tarefas com eficiência</p>
+          <form id="loginForm">
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input type="email" id="email" placeholder="seu@email.com" required>
+            </div>
+            <div class="form-group">
+              <label for="password">Senha</label>
+              <input type="password" id="password" placeholder="Sua senha" required>
+            </div>
+            <button type="submit" class="btn-primary btn-block">Entrar</button>
+          </form>
+          <p class="help-text">Teste: vicentedesouza762@gmail.com / Admin@2026</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tela Principal (Dashboard) -->
+    <div id="dashboardScreen" class="screen">
+      <nav class="navbar">
+        <div class="navbar-left">
+          <h2>📋 Tarefas</h2>
+        </div>
+        <div class="navbar-right">
+          <span id="userEmail" class="user-info"></span>
+          <button id="logoutBtn" class="btn-ghost">Sair</button>
+        </div>
+      </nav>
+
+      <div class="container">
+        <aside class="sidebar">
+          <div class="filter-group">
+            <h3>Filtros</h3>
+            <button class="filter-btn active" data-filter="all">Todas (0)</button>
+            <button class="filter-btn" data-filter="pendente">Pendentes (0)</button>
+            <button class="filter-btn" data-filter="em_progresso">Em Progresso (0)</button>
+            <button class="filter-btn" data-filter="concluida">Concluídas (0)</button>
+          </div>
+          <div class="stats-group">
+            <h3>Estatísticas</h3>
+            <div id="stats" class="stats"></div>
+          </div>
+        </aside>
+
+        <main class="main-content">
+          <div class="header-actions">
+            <button id="newTaskBtn" class="btn-primary">+ Nova Tarefa</button>
+            <input type="text" id="searchInput" placeholder="Pesquisar tarefas...">
+          </div>
+
+          <div id="tasksList" class="tasks-grid">
+            <p class="loading">Carregando tarefas...</p>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <!-- Modal Nova/Editar Tarefa -->
+    <div id="taskModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="modalTitle">Nova Tarefa</h2>
+          <button class="modal-close">&times;</button>
+        </div>
+        <form id="taskForm">
+          <div class="form-group">
+            <label for="taskTitle">Título *</label>
+            <input type="text" id="taskTitle" required>
+          </div>
+          <div class="form-group">
+            <label for="taskDesc">Descrição</label>
+            <textarea id="taskDesc" rows="4"></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="taskCategory">Categoria</label>
+              <select id="taskCategory">
+                <option value="geral">Geral</option>
+                <option value="trabalho">Trabalho</option>
+                <option value="pessoal">Pessoal</option>
+                <option value="estudo">Estudo</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="taskPriority">Prioridade</label>
+              <select id="taskPriority">
+                <option value="baixa">Baixa</option>
+                <option value="media" selected>Média</option>
+                <option value="alta">Alta</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="taskDate">Data de Vencimento</label>
+            <input type="date" id="taskDate">
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn-ghost" id="cancelBtn">Cancelar</button>
+            <button type="submit" class="btn-primary">Salvar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
