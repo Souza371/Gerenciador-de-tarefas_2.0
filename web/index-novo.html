@@ -71,7 +71,7 @@
       <section id="dashboard-section" class="section active">
         <div class="section-header">
           <h2>Dashboard</h2>
-          <p>Visão geral dos seus projetos</p>
+          <p class="section-description" style="font-size:14px; opacity:0.8; margin-top:-10px;">Visão geral executiva da sua empresa. Acompanhe os totais dinâmicos de suas obras. Clique em <b>Relatório em PDF</b> para exportar os resultados!</p>
         </div>
 
         <div class="stats-grid">
@@ -128,6 +128,7 @@
       <section id="projetos-section" class="section">
         <div class="section-header">
           <h2>Meus Projetos</h2>
+          <p class="section-description" style="font-size:14px; opacity:0.8; margin-top:-10px;">Crie e gerencie suas obras. Use o botão Editar em cada cartão para atualizar o orçamento e a barra de progresso!</p>
           <button id="newProjectBtn" class="btn btn-primary">+ Novo Projeto</button>
         </div>
 
@@ -140,6 +141,7 @@
       <section id="atividades-section" class="section">
         <div class="section-header">
           <h2>Atividades</h2>
+          <p class="section-description" style="font-size:14px; opacity:0.8; margin-top:-10px;">Acompanhe ou adicione tarefas menores e etapas cruciais que estão atreladas aos processos. Mantenha o progresso atualizado!</p>
           <div class="search-bar">
             <input type="text" id="searchActivities" placeholder="Buscar atividades..."  class="search-input">
           </div>
@@ -154,6 +156,7 @@
       <section id="materiais-section" class="section">
         <div class="section-header">
           <h2>Materiais</h2>
+          <p class="section-description" style="font-size:14px; opacity:0.8; margin-top:-10px;">Controle de insumos e despesas. Lance sacos de cimento, tijolos e aço para o projeto correspondente para ter relatórios precisos do seu estoque virtual.</p>
           <button id="newMaterialBtn" class="btn btn-primary">+ Novo Material</button>
         </div>
 
@@ -239,7 +242,10 @@
       </div>
       
       <form id="materialForm" class="form">
-        <input type="hidden" name="projeto_id">
+        <div class="form-group full">
+            <label>Projeto Destino</label>
+            <select name="projeto_id" id="materialProjetoSelect" required></select>
+          </div>
 
         <div class="form-row">
           <div class="form-group full">
@@ -357,24 +363,39 @@
 
   <!-- Modal: Editar Obra -->
   <div id="editProjetoModal" class="modal">
-    <div class="modal-content" style="max-width: 450px;">
+    <div class="modal-content" style="max-width: 500px;">
       <div class="modal-header">
-        <h3>✏️ Editar Andamento</h3>
+        <h3>✏️ Editar Informações do Projeto</h3>
         <button type="button" class="modal-close" onclick="closeModal(document.getElementById('editProjetoModal'))">×</button>
       </div>
       <div class="modal-body">
-        <div class="form-group">
-          <label>Progresso da Obra (%)</label>
-          <input type="number" id="editProgresso" placeholder="Ex: 50" min="0" max="100">
+        <div class="form-row">
+          <div class="form-group">
+            <label title="Atualize a barra de porcentagem geral do projeto.">Progresso da Obra (%)</label>
+            <input type="number" id="editProgresso" placeholder="Ex: 50" min="0" max="100">
+          </div>
+          <div class="form-group">
+            <label title="Defina o status atual da obra.">Status do Projeto</label>
+            <select id="editStatus">
+              <option value="Em andamento">Em andamento</option>
+              <option value="Atrasado">Atrasado</option>
+              <option value="Concluído">Concluído</option>
+              <option value="Cancelado">Cancelado</option>
+            </select>
+          </div>
         </div>
         <div class="form-group">
-          <label>Nova Meta / Tarefa Urgente</label>
+          <label title="Digite um novo orçamento se os custos aumentaram.">Novo Orçamento Gasto (R$)</label>
+          <input type="number" step="0.01" id="editOrcamento" placeholder="Ex: 150000.00">
+        </div>
+        <div class="form-group">
+          <label title="Descrição geral do que está sendo focado no momento.">Nova Meta / Descrição Breve</label>
           <input type="text" id="editMeta" placeholder="Descrição do foco atual">
         </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" onclick="closeModal(document.getElementById('editProjetoModal'))">Cancelar</button>
-        <button type="button" class="btn btn-primary" onclick="salvarEdicaoProjeto()">Salvar Alterações</button>
+        <button type="button" class="btn btn-primary" onclick="salvarEdicaoProjeto()" title="Clique para sincronizar as edições feitas na base de dados">Salvar Alterações</button>
       </div>
     </div>
   </div>

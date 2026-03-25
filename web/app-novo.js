@@ -136,7 +136,14 @@ function attachEventListeners() {
   projectForm?.addEventListener('submit', handleCreateProject);
 
   // Modais de material
-  newMaterialBtn?.addEventListener('click', () => openModal(materialModal));
+  newMaterialBtn?.addEventListener('click', () => {
+    const select = document.getElementById('materialProjetoSelect');
+    if(select) {
+      select.innerHTML = '<option value="">Selecione o Projeto...</option>' + 
+        projetos.map(p => `<option value="${p.id}">${p.nome}</option>`).join('');
+    }
+    openModal(materialModal);
+  });
   cancelMaterialBtn?.addEventListener('click', () => closeModal(materialModal));
   materialForm?.addEventListener('submit', handleCreateMaterial);
 
@@ -584,7 +591,20 @@ window.abrirModalFotos = function(projId) {
 
 window.abrirModalEdicao = function(projId) {
   projetoEditandoId = projId;
+  const projeto = projetos.find(p => p.id == projId);
   const modal = document.getElementById('editProjetoModal');
+  
+  // Preencher dados atuais
+  if(projeto) {
+    document.getElementById('editProgresso').value = projeto.porcentagem_concluida || 0;
+    document.getElementById('editOrcamento').value = projeto.orcamento_gasto || '';
+    document.getElementById('editMeta').value = projeto.descricao || '';
+    const statusEl = document.getElementById('editStatus');
+    if(statusEl && projeto.status) {
+        statusEl.value = projeto.status;
+    }
+  }
+
   modal.classList.add('active');
 };
 
@@ -593,24 +613,59 @@ window.salvarFotoDoc = function() {
   window.closeModal(document.getElementById('fotosModal'));
 };
 
-window.salvarEdicaoProjeto = function() {
+window.salvarEdicaoProjeto = async function() {
   const meta = document.getElementById('editMeta').value;
   const progresso = document.getElementById('editProgresso').value;
-  
+  const statusEl = document.getElementById('editStatus');
+  const statusDesc = statusEl ? statusEl.value : null;
+  const orcamentoEl = document.getElementById('editOrcamento');
+  let orcamento = orcamentoEl ? orcamentoEl.value : null;
+
   if(projetoEditandoId) {
     const projeto = projetos.find(p => p.id == projetoEditandoId);
     if(projeto) {
-      projeto.porcentagem_concluida = progresso || projeto.porcentagem_concluida;
-      // Idealmente aqui faríamos um fetch(${API_URL}/projetos/${projetoEditandoId}) 
-      // Mas para atualizar na tela agora usamos render:
-      renderProjetos();
+      const payload = {
+        nome: projeto.nome, // Enviando os dados existentes se nao editou
+        descricao: meta ? meta : projeto.descricao, 
+        status: statusDesc ? statusDesc : projeto.status,
+        porcentagem_concluida: progresso ? parseInt(progresso) : projeto.porcentagem_concluida,
+        orcamento_gasto: orcamento ? parseFloat(orcamento) : projeto.orcamento_gasto,
+        data_termino_real: projeto.data_termino_real
+      };
+
+      try {
+        const response = await fetch(`${API_URL}/projetos/${projetoEditandoId}`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${authToken}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (response.ok) {
+          // Atualiza na view local
+          projeto.porcentagem_concluida = payload.porcentagem_concluida;
+          projeto.status = payload.status;
+          projeto.descricao = payload.descricao;
+          projeto.orcamento_gasto = payload.orcamento_gasto;
+          
+          renderProjetos();
+          loadDashboard(); // Recarrega gráficos se alterar algo
+          showAlert(`✅ Informações e progresso atualizados com sucesso no banco!`, 'success');
+        } else {
+          showAlert(`❌ Erro ao atualizar os dados do banco!`, 'error');
+        }
+      } catch (err) {
+        showAlert(`❌ Erro na conexão para atualizar o projeto.`, 'error');
+      }
     }
   }
 
-  showAlert(`✅ Projeto atualizado para ${progresso}% de conclusão com a nova meta!`, 'success');
   window.closeModal(document.getElementById('editProjetoModal'));
   document.getElementById('editMeta').value = '';
   document.getElementById('editProgresso').value = '';
+  if (orcamentoEl) orcamentoEl.value = '';
 };
 
 // ==========================================
