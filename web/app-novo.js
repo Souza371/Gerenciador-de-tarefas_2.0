@@ -351,8 +351,8 @@ function renderProjetos() {
         </div>
 
         <div class="project-actions">
-          <button class="btn btn-secondary" onclick="event.stopPropagation(); showAlert('Abertura da Galeria de Fotos e Docs do projeto...', 'success')">📷 Fotos/Docs</button>
-          <button class="btn btn-primary" onclick="event.stopPropagation(); showAlert('Tela de edição de metas de projeto...', 'success')">✏️ Editar</button>
+          <button class="btn btn-secondary" onclick="event.stopPropagation(); window.abrirModalFotos(this.dataset.id)" data-id="${proj.id}">📷 Fotos/Docs</button>
+          <button class="btn btn-primary" onclick="event.stopPropagation(); window.abrirModalEdicao(this.dataset.id)" data-id="${proj.id}">✏️ Editar</button>
         </div>
       </div>
     `;
@@ -567,3 +567,36 @@ function showAlert(message, type = 'info') {
 
 // ===== INICIAR APLICAÇÃO =====
 document.addEventListener('DOMContentLoaded', init);
+
+// Tornar funções globais para permitir os cliques nos botões HTML gerados em string e modais:
+window.closeModal = function(modal) {
+  modal.classList.remove('active');
+};
+
+let projetoEditandoId = null;
+
+window.abrirModalFotos = function(projId) {
+  projetoEditandoId = projId;
+  const modal = document.getElementById('fotosModal');
+  modal.classList.add('active');
+};
+
+window.abrirModalEdicao = function(projId) {
+  projetoEditandoId = projId;
+  const modal = document.getElementById('editProjetoModal');
+  modal.classList.add('active');
+};
+
+window.salvarFotoDoc = function() {
+  alert('Simulação: Arquivo enviado e anexado ao repositório do projeto!');
+  window.closeModal(document.getElementById('fotosModal'));
+};
+
+window.salvarEdicaoProjeto = function() {
+  const meta = document.getElementById('editMeta').value;
+  const progresso = document.getElementById('editProgresso').value;
+  alert(`Simulação: Projeto atualizado!\nNova meta: ${meta}\nProgresso: ${progresso}%`);
+  window.closeModal(document.getElementById('editProjetoModal'));
+  document.getElementById('editMeta').value = '';
+  document.getElementById('editProgresso').value = '';
+};
