@@ -52,17 +52,24 @@ html, body {
 }
 
 .login-container {
-  width: 100%;
+  width: 90%;
   max-width: 550px;
-  padding: 20px;
+  padding: 10px;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .login-box {
+  width: 100%;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
-  border-radius: 12px;
-  padding: 40px;
+  border-radius: 15px;
+  padding: clamp(20px, 5vw, 40px);
   box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
 }
 
 .logo {
@@ -72,13 +79,15 @@ html, body {
 
 .logo h1 {
   color: var(--primary-color);
-  font-size: 2.5em;
-  margin-bottom: 10px;
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  margin-bottom: 5px;
+  line-height: 1.2;
 }
 
 .logo p {
   color: #7f8c8d;
-  font-size: 1.1em;
+  font-size: clamp(0.9rem, 2vw, 1.1rem);
+  margin-top: 5px;
 }
 
 .form-group {
