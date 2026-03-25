@@ -285,13 +285,20 @@
         <button class="modal-close" id="closeRecoveryModal">&times;</button>
       </div>
       
-      <!-- Passo 1: Informar Celular -->
+      <!-- Passo 1: Informar Identificação e Celular -->
       <div id="stepPhone" class="modal-body">
-        <p style="margin-bottom: 15px; color: #7f8c8d;">Informe o número de celular da sua conta para receber um código de recuperação.</p>
+        <p style="margin-bottom: 15px; color: #7f8c8d;">Confirme os dados da sua conta para receber um código de recuperação seguro.</p>
+        
         <div class="form-group">
-          <label for="recoveryPhone">Número de Celular</label>
+          <label for="recoveryEmail">E-mail ou CPF da Conta</label>
+          <input type="text" id="recoveryEmail" placeholder="Qual conta deseja acessar?">
+        </div>
+
+        <div class="form-group">
+          <label for="recoveryPhone">Número de Celular (Para SMS)</label>
           <input type="tel" id="recoveryPhone" placeholder="(11) 99999-9999">
         </div>
+        
         <div class="modal-footer" style="padding-top: 5px;">
           <button type="button" class="btn btn-primary" id="sendSmsBtn" style="width: 100%;">Enviar Código via SMS</button>
         </div>

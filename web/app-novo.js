@@ -78,14 +78,21 @@ function attachEventListeners() {
 
     // Simular o Envio do SMS
     sendSmsBtn.addEventListener('click', () => {
+      const emailInput = document.getElementById('recoveryEmail').value;
       const phoneInput = document.getElementById('recoveryPhone').value;
+      
+      if (!emailInput) {
+        showAlert('Informe qual conta (E-mail ou CPF) você quer recuperar!', 'error');
+        return;
+      }
+      
       if (phoneInput.length > 8) {
         // Simula comunicação com a operadora
         sendSmsBtn.textContent = 'Enviando...';
         sendSmsBtn.style.opacity = '0.7';
         
         setTimeout(() => {
-          showAlert(`Código SMS enviado com sucesso para ${phoneInput}!`, 'success');
+          showAlert(`Código SMS enviado para ${phoneInput} (Conta: ${emailInput})`, 'success');
           stepPhone.style.display = 'none';
           stepCode.style.display = 'block';
           sendSmsBtn.textContent = 'Enviar Código via SMS';
@@ -335,12 +342,17 @@ function renderProjetos() {
           <div class="progress-bar">
             <div class="progress-fill" style="width: ${p.porcentagem_concluida || 0}%"></div>
           </div>
-          <small>${p.porcentagem_concluida || 0}% concluído</small>
+          <small>📊 ${p.porcentagem_concluida || 0}% Executado da Obra</small>
         </div>
 
         <div class="project-footer">
           <span>Orçamento: R$ ${(p.orcamento_total || 0).toFixed(2)}</span>
           <span>Gasto: R$ ${(p.orcamento_gasto || 0).toFixed(2)}</span>
+        </div>
+
+        <div class="project-actions">
+          <button class="btn btn-secondary" onclick="event.stopPropagation(); showAlert('Abertura da Galeria de Fotos e Docs do projeto...', 'success')">📷 Fotos/Docs</button>
+          <button class="btn btn-primary" onclick="event.stopPropagation(); showAlert('Tela de edição de metas de projeto...', 'success')">✏️ Editar</button>
         </div>
       </div>
     `;
