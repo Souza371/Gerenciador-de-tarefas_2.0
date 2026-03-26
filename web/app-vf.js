@@ -42,6 +42,19 @@ function attachEventListeners() {
   loginForm?.addEventListener('submit', handleLogin);
   logoutBtn?.addEventListener('click', handleLogout);
 
+  // Sistema de Busca em Tempo Real (Offline/Leve)
+  const searchInput = document.getElementById('searchInput');
+  if (searchInput) {
+    searchInput.addEventListener('keyup', (e) => {
+      const termo = e.target.value.toLowerCase();
+      const projetosFiltrados = projetos.filter(p => 
+        p.nome.toLowerCase().includes(termo) || 
+        (p.localizacao && p.localizacao.toLowerCase().includes(termo))
+      );
+      renderProjetos(projetosFiltrados);
+    });
+  }
+
   // Toggle Password Visibilidade
   const togglePasswordBtn = document.getElementById('togglePassword');
   if (togglePasswordBtn) {
@@ -347,19 +360,36 @@ async function loadProjetos() {
   }
 }
 
-function renderProjetos() {
+function renderProjetos(listaParaRenderizar = projetos) {
   const container = document.getElementById('projectsContainer');
 
-  if (projetos.length === 0) {
-    container.innerHTML = '<p class="loading">Nenhum projeto encontrado. Crie um novo!</p>';
+  if (listaParaRenderizar.length === 0) {
+    container.innerHTML = '<p class="loading">Nenhum projeto encontrado.</p>';
     return;
   }
 
   let html = '';
-  projetos.forEach(p => {
+  listaParaRenderizar.forEach(p => {
+    // Calcular Status do Prazo (Inteligência de Cor)
+    let prazoBadge = '';
+    if (p.data_termino_prevista) {
+      const previsao = new Date(p.data_termino_prevista);
+      const hoje = new Date();
+      const diffTime = previsao - hoje;
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      
+      if (diffDays < 0) {
+        prazoBadge = '<span class="status-badge red">Atrasado</span>';
+      } else if (diffDays <= 7) {
+        prazoBadge = `<span class="status-badge yellow">${diffDays} dias restantes</span>`;
+      } else {
+        prazoBadge = '<span class="status-badge green">No prazo</span>';
+      }
+    }
+
     html += `
       <div class="project-card" onclick="viewProject(${p.id})">
-        <h3>${p.nome}</h3>
+        <h3>${p.nome} ${prazoBadge}</h3>
         <p><strong>📍 ${p.localizacao}</strong></p>
         <p>Tipo: ${p.tipo}</p>
         <p>Status: <strong>${p.status}</strong></p>
@@ -581,15 +611,37 @@ function closeModal(modal) {
   modal.classList.remove('active');
 }
 
-// ===== NOTIFICAÇÕES =====
+// ===== NOTIFICAÇÕES TOAST (LEVES E MODERNAS) =====
 function showAlert(message, type = 'info') {
-  // Implementar notificação mais sofisticada se desejar
   console.log(`[${type.toUpperCase()}] ${message}`);
   
-  // Por enquanto, usar alert simples
-  if (type === 'error') {
-    alert(message);
+  // Criar contêiner se não existir
+  let toastContainer = document.getElementById('toast-container');
+  if (!toastContainer) {
+    toastContainer = document.createElement('div');
+    toastContainer.id = 'toast-container';
+    document.body.appendChild(toastContainer);
   }
+
+  // Criar o balão de Toast
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  
+  // Escolher o ícone baseado no tipo para ficar bonito
+  let icon = 'ℹ️';
+  if (type === 'success') icon = '✅';
+  if (type === 'error') icon = '❌';
+  if (type === 'warning') icon = '⚠️';
+
+  toast.innerHTML = `<span>${icon} ${message}</span>`;
+  
+  toastContainer.appendChild(toast);
+
+  // Remover sozinho depois de 3 segundos
+  setTimeout(() => {
+    toast.style.animation = 'fadeOutRight 0.3s ease forwards';
+    setTimeout(() => toast.remove(), 300);
+  }, 3000);
 }
 
 // ===== INICIAR APLICAÇÃO =====
