@@ -778,36 +778,78 @@ window.renderChartOnDashboard = function(dataStats) {
   dashboardChartInstance = new Chart(ctx, {
     type: 'bar',
     data: {
-      labels: ['Em Andamento', 'Pendências', 'Finalizados', 'Fase de Planejamento'],
+      labels: ['Em Andamento', 'Pendências', 'Finalizados', 'Planejamento'],
       datasets: [{
-        label: 'Métricas das Obras',
+        label: 'Desempenho Atual',
         data: [andamento, pendentes, entregues, (total - andamento)], 
         backgroundColor: [
-          '#3498db', // Azul
-          '#e74c3c', // Vermelho
-          '#2ecc71', // Verde
-          '#f1c40f'  // Amarelo
+          'rgba(52, 152, 219, 0.7)', // Azul Moderno
+          'rgba(231, 76, 60, 0.7)',  // Vermelho
+          'rgba(46, 204, 113, 0.7)', // Verde
+          'rgba(241, 196, 15, 0.7)'  // Amarelo
         ],
-        borderWidth: 1,
-        borderRadius: 4
+        borderColor: [
+          'rgba(52, 152, 219, 1)',
+          'rgba(231, 76, 60, 1)',
+          'rgba(46, 204, 113, 1)',
+          'rgba(241, 196, 15, 1)'
+        ],
+        borderWidth: 2,
+        borderRadius: 8,            // Bordas mais arredondadas
+        barPercentage: 0.6,         // Barras mais compactas e elegantes
+        hoverBackgroundColor: [     // Efeito visual ao passar o mouse
+          'rgba(52, 152, 219, 1)',
+          'rgba(231, 76, 60, 1)',
+          'rgba(46, 204, 113, 1)',
+          'rgba(241, 196, 15, 1)'
+        ]
       }]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      animation: {
+        duration: 1500,             // Animação super suave ao carregar
+        easing: 'easeOutQuart'
+      },
       plugins: {
-        legend: { labels: { color: textColor, font: { size: 14 } } },
-        tooltip: { boxPadding: 6 }
+        legend: { 
+          display: true,
+          position: 'top',
+          labels: { 
+            color: textColor, 
+            font: { size: 13, family: "system-ui, -apple-system, sans-serif", weight: '600' },
+            usePointStyle: true,    // Ícones em formato de bolinha na legenda
+            padding: 20
+          } 
+        },
+        tooltip: { 
+          backgroundColor: isDark ? 'rgba(30, 30, 30, 0.9)' : 'rgba(255, 255, 255, 0.95)',
+          titleColor: isDark ? '#ffffff' : '#2c3e50',
+          bodyColor: isDark ? '#dddddd' : '#555555',
+          borderColor: isDark ? '#444444' : '#e0e0e0',
+          borderWidth: 1,
+          padding: 12,
+          cornerRadius: 8,
+          usePointStyle: true,
+          titleFont: { size: 14, family: "system-ui", weight: 'bold' },
+          bodyFont: { size: 13, family: "system-ui", weight: '500' },
+          boxPadding: 8
+        }
       },
       scales: {
         y: { 
           beginAtZero: true, 
-          ticks: { color: textColor }, 
-          grid: { color: gridColor } 
+          ticks: { color: textColor, font: { size: 12 } }, 
+          grid: { 
+            color: gridColor, 
+            borderDash: [5, 5],     // Linhas pontilhadas (estilo dashboard premium)
+            drawBorder: false 
+          } 
         },
         x: { 
-          ticks: { color: textColor }, 
-          grid: { display: false } 
+          ticks: { color: textColor, font: { size: 13, weight: '600' } }, 
+          grid: { display: false, drawBorder: false } 
         }
       }
     }
