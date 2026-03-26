@@ -11,16 +11,19 @@
   --success-color: #27ae60;
   --danger-color: #e74c3c;
   --warning-color: #f1c40f; /* Amarelo da construção */
-  --light-bg: #ecf0f1;
-  --dark-text: #2c3e50;
-  --border-color: #bdc3c7;
-  --shadow: 0 2px 8px rgba(0,0,0,0.1);
-  --shadow-lg: 0 4px 16px rgba(0,0,0,0.15);
+  --bg-color: #e4e9f0;      /* Fundo suavizado Anti-reflexo (Eye Care) */
+  --card-bg: #fdfdfd;       /* Branco off-white (Não agride os olhos) */
+  --light-bg: #dbe1e8;
+  --dark-text: #34495e;     /* Cinza chumbo escuro, menos agressivo que o preto puro */
+  --text-color: #34495e;
+  --border-color: #c8d1d8;
+  --shadow: 0 4px 12px rgba(0,0,0,0.06);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.1);
 }
 
 html, body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f5f7fa;
+  background-color: var(--bg-color);
   color: var(--dark-text);
   line-height: 1.6;
 }
@@ -224,7 +227,7 @@ html, body {
 
 /* ===== NAVBAR ===== */
 .navbar {
-  background-color: white;
+  background-color: var(--card-bg);
   padding: 15px 30px;
   display: flex;
   justify-content: space-between;
@@ -357,7 +360,7 @@ html, body {
 }
 
 .stat-card {
-  background: white;
+  background-color: var(--card-bg);
   border-radius: 12px;
   padding: 25px;
   display: flex;
@@ -391,7 +394,7 @@ html, body {
 
 /* ===== PROJETOS ===== */
 .recent-projects {
-  background: white;
+  background-color: var(--card-bg);
   border-radius: 12px;
   padding: 25px;
   box-shadow: var(--shadow);
@@ -460,7 +463,7 @@ table tr:hover {
 }
 
 .project-card {
-  background: white;
+  background-color: var(--card-bg);
   border-radius: 12px;
   padding: 20px;
   box-shadow: var(--shadow);
@@ -533,7 +536,7 @@ table tr:hover {
 }
 
 .activity-item {
-  background: white;
+  background-color: var(--card-bg);
   padding: 15px;
   border-left: 4px solid var(--secondary-color);
   border-radius: 6px;
@@ -577,7 +580,7 @@ table tr:hover {
 }
 
 .material-card {
-  background: white;
+  background-color: var(--card-bg);
   padding: 15px;
   border-radius: 8px;
   box-shadow: var(--shadow);
@@ -625,7 +628,7 @@ table tr:hover {
 }
 
 .modal-content {
-  background: white;
+  background-color: var(--card-bg);
   border-radius: 12px;
   box-shadow: var(--shadow-lg);
   max-width: 600px;
