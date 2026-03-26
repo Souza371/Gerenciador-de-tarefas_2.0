@@ -43,7 +43,7 @@ html, body {
 
 #loginScreen {
   display: none;
-  background: linear-gradient(rgba(202, 70, 0, 0.7), rgba(202, 70, 0, 0.8)), url('https://images.unsplash.com/photo-1541888081622-3a808e0018e6?q=80&w=2000&auto=format&fit=crop') no-repeat center center;
+  background: linear-gradient(rgba(202, 70, 0, 0.7), rgba(202, 70, 0, 0.8)), url('https://images.unsplash.com/photo-1503387762-592deb58ef4e?q=80&w=2000&auto=format&fit=crop') no-repeat center center;
   background-size: cover;
   align-items: center;
   justify-content: center;

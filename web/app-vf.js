@@ -25,7 +25,7 @@ const cancelProjectBtn = document.getElementById('cancelProjectBtn');
 const cancelMaterialBtn = document.getElementById('cancelMaterialBtn');
 
 // ===== INICIALIZAÇÃO =====
-function init() {
+function init() { 
   if (authToken && currentUser) {
     showDashboard();
     loadDashboard();
@@ -47,10 +47,16 @@ function attachEventListeners() {
   if (togglePasswordBtn) {
     togglePasswordBtn?.addEventListener('click', () => {
       const passwordInput = document.getElementById('password');
-      const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-      passwordInput.setAttribute('type', type);
-      // Muda a carinha do macaco! 🙈 = escondido, 🐵 = visível
-      togglePasswordBtn.textContent = type === 'password' ? '🙈' : '🐵';
+      const monkeyIcon = document.getElementById('monkeyIcon');
+      const passwordStatusText = document.getElementById('passwordStatusText');
+      const isPassword = passwordInput.getAttribute('type') === 'password';
+      
+      const newType = isPassword ? 'text' : 'password';
+      passwordInput.setAttribute('type', newType);
+      
+      // Muda a carinha do macaco e o texto indicativo
+      if (monkeyIcon) monkeyIcon.textContent = isPassword ? '🐵' : '🙈';
+      if (passwordStatusText) passwordStatusText.textContent = isPassword ? 'Visível' : 'Oculto';
     });
   }
 
@@ -245,6 +251,11 @@ async function loadDashboard() {
       headers: { 'Authorization': `Bearer ${authToken}` }
     });
 
+    if (response.status === 401 || response.status === 403) {
+      handleLogout();
+      return;
+    }
+
     if (!response.ok) return;
 
     const data = await response.json();
@@ -321,6 +332,11 @@ async function loadProjetos() {
     const response = await fetch(`${API_URL}/projetos`, {
       headers: { 'Authorization': `Bearer ${authToken}` }
     });
+
+    if (response.status === 401 || response.status === 403) {
+      handleLogout();
+      return;
+    }
 
     if (!response.ok) return;
 
@@ -652,10 +668,10 @@ window.salvarEdicaoProjeto = async function() {
       };
 
       try {
-        const response = await fetch(, {
+        const response = await fetch(`${API_URL}/projetos/${projeto.id}`, {
           method: 'PUT',
           headers: {
-            'Authorization': ,
+            'Authorization': `Bearer ${authToken}`,
             'Content-Type': 'application/json'
           },
           body: JSON.stringify(payload)
@@ -676,9 +692,10 @@ window.salvarEdicaoProjeto = async function() {
           renderProjetos();
           loadDashboard(); 
         } else {
+          showAlert('Erro ao atualizar banco de dados.', 'error');
         }
       } catch (err) {
-        showAlert(, 'error');
+        showAlert('Erro de conexão ao salvar.', 'error');
       }
     }
   }
@@ -845,3 +862,4 @@ window.gerarRelatorioProjeto = function(projId) {
     showAlert('✅ Relatório baixado com sucesso!', 'success');
   });
 };
+document.addEventListener('DOMContentLoaded', init);

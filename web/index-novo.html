@@ -4,7 +4,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gerenciador de Tarefas 2.0</title>
-  <link rel="stylesheet" href="styles-novo.css">
+  <link rel="stylesheet" href="styles-vf.css">
+  <!-- Script para limpar Service Workers antigos -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for(let registration of registrations) {
+          registration.unregister();
+          console.log('Service Worker removido!');
+        }
+      });
+    }
+  </script>
   <!-- Bibliotecas Externas via CDN (Para não pesar no PC) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -29,7 +40,9 @@
             <label for="password">Senha</label>
             <div class="password-wrapper">
               <input type="password" id="password" placeholder="Sua senha" required>
-              <button type="button" id="togglePassword" class="toggle-password" title="Mostrar/Ocultar senha">🙈</button>
+              <button type="button" id="togglePassword" class="toggle-password" title="Mostrar/Ocultar senha">
+                <span id="monkeyIcon">🙈</span> <span id="passwordStatusText" style="font-size: 12px; margin-left: 4px;">Oculto</span>
+              </button>
             </div>
           </div>
           
@@ -39,14 +52,6 @@
 
           <button type="submit" class="btn btn-primary btn-block">Entrar</button>
         </form>
-        <div class="login-footer">
-          <p><b>Contas de Teste Rápidas (Clique aqui para preencher):</b></p>
-          <div class="accounts-grid" style="display: grid; grid-template-columns: 1fr; gap: 8px; margin-top: 10px; font-size: 11px; text-align: left; background: rgba(0,0,0,0.05); padding: 10px; border-radius: 8px;">
-            <small onclick="document.getElementById('email').value='vicentedesouza762@gmail.com'; document.getElementById('password').value='Admin@2026';" style="cursor: pointer; padding: 6px; border-radius: 4px; background: rgba(255,255,255,0.8); border: 1px solid #ccc; color: #333;">👑 <b>Vicente (Admin):</b> vicente... / Admin@2026</small>
-            <small onclick="document.getElementById('email').value='francisco@projeto.com'; document.getElementById('password').value='Admin@2026';" style="cursor: pointer; padding: 6px; border-radius: 4px; background: rgba(255,255,255,0.8); border: 1px solid #ccc; color: #333;">🎩 <b>Francisco (Admin):</b> francisco... / Admin@2026</small>
-            <small onclick="document.getElementById('email').value='engenheiroteste@projeto.com'; document.getElementById('password').value='Engenheiro@123';" style="cursor: pointer; padding: 6px; border-radius: 4px; background: rgba(255,255,255,0.8); border: 1px solid #ccc; color: #333;">👷‍♂️ <b>Engenheiro:</b> engenheiro... / Engenheiro@123</small>
-          </div>
-        </div>
       </div>
     </div>
   </div>
@@ -451,6 +456,6 @@
     </div>
   </div>
 
-  <script src="app-novo.js"></script>
+  <script src="app-vf.js"></script>
 </body>
 </html>
