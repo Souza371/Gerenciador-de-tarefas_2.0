@@ -38,6 +38,25 @@ function init() {
 
 // ===== EVENT LISTENERS =====
 function attachEventListeners() {
+  // Evento do Mural de Avisos
+  const editNoticeBtn = document.getElementById('editNoticeBtn');
+  if (editNoticeBtn) {
+    editNoticeBtn.addEventListener('click', () => {
+      const p = document.getElementById('boardNotices');
+      const text = prompt("Digite o novo aviso para a equipe:", p.innerText);
+      if(text !== null && text.trim() !== "") {
+        p.innerText = text;
+        localStorage.setItem('projeto_avisos', text); // Salva os avisos localmente para o time
+      }
+    });
+    
+    // Tenta carregar aviso salvo
+    const savedNotice = localStorage.getItem('projeto_avisos');
+    if(savedNotice) {
+      document.getElementById('boardNotices').innerText = savedNotice;
+    }
+  }
+
   // Login
   loginForm?.addEventListener('submit', handleLogin);
   logoutBtn?.addEventListener('click', handleLogout);
@@ -493,30 +512,69 @@ async function loadAtividades() {
 }
 
 function renderAtividades(atividades) {
-  const container = document.getElementById('activitiesList');
+  // Limpar as colunas do Kanban
+  const colPendente = document.getElementById('list-pendente');
+  const colAndamento = document.getElementById('list-em_andamento');
+  const colRevisao = document.getElementById('list-revisao');
+  const colConcluida = document.getElementById('list-concluida');
 
+  if(!colPendente) return; // Segurança pra caso não esteja na tela
+
+  colPendente.innerHTML = '';
+  colAndamento.innerHTML = '';
+  colRevisao.innerHTML = '';
+  colConcluida.innerHTML = '';
+
+  // Se não houver atividades cadastradas no banco, vamos colocar umas de "Exemplo/Tour" para mostrar o quadro!
   if (atividades.length === 0) {
-    container.innerHTML = '<p class="loading">Nenhuma atividade encontrada</p>';
-    return;
+    atividades = [
+      { id: 'demo1', titulo: 'Comprar Cimento e Areia', descricao: 'Cotar preços em 3 fornecedores diferentes.', prioridade: 'Alta', status: 'pendente', data_vencimento: '2026-03-30', responsavel_nome: 'Vicente Souza', projeto: 'Casa Vila Mariana' },
+      { id: 'demo2', titulo: 'Ajeitar Fundação', descricao: 'Preparar o terreno para sapatas.', prioridade: 'Normal', status: 'andamento', data_vencimento: '2026-04-10', responsavel_nome: 'Francisco', projeto: 'Casa Vila Mariana' },
+      { id: 'demo3', titulo: 'Aprovar Planta', descricao: 'Revisar o projeto elétrico com o arquiteto.', prioridade: 'Baixa', status: 'revisao', data_vencimento: '2026-03-25', responsavel_nome: 'Engenheiro Teste', projeto: 'Casa Vila Mariana' },
+      { id: 'demo4', titulo: 'Limpeza do Terreno', descricao: 'Remoção de entulhos e mato do lote.', prioridade: 'Normal', status: 'concluida', data_vencimento: '2026-03-20', responsavel_nome: 'Vicente Souza', projeto: 'Casa Vila Mariana' }
+    ];
   }
 
-  let html = '';
   atividades.forEach(a => {
-    html += `
-      <div class="activity-item ${a.status}">
-        <div class="activity-content">
-          <h4>${a.titulo}</h4>
-          <p>${a.descricao || 'Sem descrição'}</p>
-          <small>Projeto: ${a.projeto} | Vencimento: ${a.data_vencimento || 'N/A'}</small>
+    // 1. Gera informações do Avatar do Responsável
+    const responsavelNome = a.responsavel_nome || 'Sem Categoria'; 
+    const iniciais = (responsavelNome !== 'Sem Categoria') ? responsavelNome.substring(0,2).toUpperCase() : '👤';
+
+    // 2. Cor da Etiqueta (Baseado em Prioridade. Assumindo propriedades fictícias que podemos definir no BD)
+    let prioriColor = 'tag-blue'; 
+    let prioriNome = a.prioridade || 'Normal';
+    if(prioriNome.toLowerCase() === 'alta' || prioriNome.toLowerCase() === 'urgente') prioriColor = 'tag-red';
+    if(prioriNome.toLowerCase() === 'baixa') prioriColor = 'tag-green';
+
+    // 3. Montar o Card estilo Trello
+    let cardHtml = `
+      <div class="kanban-card" data-id="${a.id}">
+        <div class="kanban-tags">
+          <span class="kanban-tag ${prioriColor}">${prioriNome.toUpperCase()}</span>
+          <span class="kanban-tag tag-yellow" style="background:#e0e0e0; color:#444; max-width:120px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${a.projeto}</span>
         </div>
-        <div class="activity-actions">
-          <span class="status-badge status-${a.status}">${a.status}</span>
+        <h4 style="margin: 5px 0;">${a.titulo}</h4>
+        <p style="font-size: 11px; color: #666; margin-bottom: 10px;">${a.descricao ? a.descricao.substring(0, 40) + '...' : '<i>Sem detalhes</i>'}</p>
+        <div class="kanban-footer">
+          <div class="kanban-date">🗓️ ${a.data_vencimento ? a.data_vencimento.split('T')[0] : 'S/ Data'}</div>
+          <div class="kanban-user" title="Responsável: ${responsavelNome}">${iniciais}</div>
         </div>
       </div>
     `;
-  });
 
-  container.innerHTML = html;
+    // 4. Distribuir nas colunas corretas baseado no Status
+    const status = (a.status || '').toLowerCase();
+    
+    if (status.includes('concluid') || status.includes('concluíd') || status === 'done') {
+      colConcluida.innerHTML += cardHtml;
+    } else if (status.includes('andamento') || status.includes('fazendo') || status === 'doing') {
+      colAndamento.innerHTML += cardHtml;
+    } else if (status.includes('revisao') || status.includes('revisão') || status.includes('teste') || status === 'review') {
+      colRevisao.innerHTML += cardHtml;
+    } else {
+      colPendente.innerHTML += cardHtml; // Pendente ou Qualquer outro vai para To Do
+    }
+  });
 }
 
 // ===== MATERIAIS =====

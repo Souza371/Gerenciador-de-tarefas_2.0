@@ -158,15 +158,48 @@
       <!-- ATIVIDADES SECTION -->
       <section id="atividades-section" class="section">
         <div class="section-header">
-          <h2>Atividades</h2>
-          <p class="section-description" style="font-size:14px; opacity:0.8; margin-top:-10px;">Acompanhe ou adicione tarefas menores e etapas cruciais que estão atreladas aos processos. Mantenha o progresso atualizado!</p>
+          <h2>Atividades / Quadro Kanban</h2>
+          <p class="section-description" style="font-size:14px; opacity:0.8; margin-top:-10px;">Acompanhe as tarefas no modelo visual (A Fazer, Em Andamento, Revisão, Concluído).</p>
           <div class="search-bar">
             <input type="text" id="searchActivities" placeholder="Buscar atividades..."  class="search-input">
           </div>
         </div>
 
-        <div class="activities-list" id="activitiesList">
-          <p class="loading">Carregando atividades...</p>
+        <!-- MURAL DE AVISOS -->
+        <div class="notice-board-container" style="margin-bottom: 25px;">
+          <div class="notice-board">
+            <span class="pin">📌</span>
+            <h3>Avisos do Projeto</h3>
+            <p id="boardNotices" style="margin: 10px 0; font-family: 'Comic Sans MS', cursive, sans-serif; color: #333;">Lembrete: Atualizem diariamente os status das tarefas. Bom trabalho, equipe!</p>
+            <button id="editNoticeBtn" class="btn btn-sm btn-outline-warning" style="margin-top: 5px; font-size: 11px; padding: 4px 8px;">✏️ Editar Avisos</button>
+          </div>
+        </div>
+
+        <!-- QUADRO KANBAN -->
+        <div class="kanban-board" id="kanbanBoard">
+          <!-- Coluna A Fazer -->
+          <div class="kanban-column" id="col-pendente">
+            <div class="kanban-header">📝 A Fazer</div>
+            <div class="kanban-cards" id="list-pendente"></div>
+          </div>
+          
+          <!-- Coluna Em Andamento -->
+          <div class="kanban-column" id="col-em_andamento">
+            <div class="kanban-header">⏳ Sendo Feito</div>
+            <div class="kanban-cards" id="list-em_andamento"></div>
+          </div>
+          
+          <!-- Coluna Em Revisão -->
+          <div class="kanban-column" id="col-revisao">
+            <div class="kanban-header">🔍 Em Revisão</div>
+            <div class="kanban-cards" id="list-revisao"></div>
+          </div>
+          
+          <!-- Coluna Concluído -->
+          <div class="kanban-column" id="col-concluida">
+            <div class="kanban-header">✅ Concluído</div>
+            <div class="kanban-cards" id="list-concluida"></div>
+          </div>
         </div>
       </section>
 
