@@ -1027,3 +1027,41 @@ body, .project-card, .stat-card, .login-box, .modal-content, .navbar {
 .status-badge.yellow { background-color: #f39c12; color: #fff; }
 .status-badge.red { background-color: #e74c3c; }
 
+
+/* Correção visual dos Badges nos modos Claro/Escuro */
+[data-theme="dark"] .status-em-andamento {
+  background-color: rgba(243, 156, 18, 0.2) !important;
+  color: #f39c12 !important;
+  border: 1px solid rgba(243, 156, 18, 0.4);
+}
+
+[data-theme="dark"] .status-planejamento {
+  background-color: rgba(52, 152, 219, 0.2) !important;
+  color: #3498db !important;
+  border: 1px solid rgba(52, 152, 219, 0.4);
+}
+
+[data-theme="dark"] .status-concluido {
+  background-color: rgba(46, 204, 113, 0.2) !important;
+  color: #2ecc71 !important;
+  border: 1px solid rgba(46, 204, 113, 0.4);
+}
+
+/* Força cores melhores e legíveis no claro (pois o text-color puro buga fundo fraco) */
+.status-em-andamento {
+  background-color: #fff3cd !important;
+  color: #856404 !important;
+  border: 1px solid #ffeeba;
+}
+
+.status-planejamento {
+  background-color: #d1ecf1 !important;
+  color: #0c5460 !important;
+  border: 1px solid #bee5eb;
+}
+
+.status-concluido {
+  background-color: #d4edda !important;
+  color: #155724 !important;
+  border: 1px solid #c3e6cb;
+}
