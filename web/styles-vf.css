@@ -1065,3 +1065,36 @@ body, .project-card, .stat-card, .login-box, .modal-content, .navbar {
   color: #155724 !important;
   border: 1px solid #c3e6cb;
 }
+
+/* Correção Definitiva da Renderização dos Status em Tabelas */
+.status-badge {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  min-width: 100px;
+  padding: 6px 12px !important;
+  border-radius: 20px !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: 1px solid transparent;
+}
+
+/* Casos mal formatados do banco de dados (ex: 'Em andamento' com espaços) agora ganham cor padrão */
+.status-badge[class*="em_andamento"],
+.status-badge[class*="andamento"],
+td .status-badge:not(.status-planejamento):not(.status-concluido) {
+  background-color: #fff3cd !important;
+  color: #856404 !important;
+  border-color: #ffeeba !important;
+}
+
+/* Cor Padrão Genérica Escura caso escape algum text fixo invisível */
+[data-theme="dark"] .status-badge[class*="em_andamento"],
+[data-theme="dark"] .status-badge[class*="andamento"],
+[data-theme="dark"] td .status-badge:not(.status-planejamento):not(.status-concluido) {
+  background-color: rgba(243, 156, 18, 0.2) !important;
+  color: #f39c12 !important;
+  border-color: rgba(243, 156, 18, 0.4) !important;
+}
