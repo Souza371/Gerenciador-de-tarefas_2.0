@@ -880,6 +880,7 @@ body, .project-card, .stat-card, .login-box, .modal-content, .navbar {
 [data-theme="dark"] {
   --bg-color: #121212;
   --light-bg: #1e1e1e;
+  --card-bg: #1e1e1e; /* Fundo dos cards escuro */
   --dark-text: #f0f0f0;
   --text-color: #bbbbbb;
   --border-color: #333333;
@@ -1221,3 +1222,49 @@ td .status-badge:not(.status-planejamento):not(.status-concluido) {
   font-weight: bold;
 }
 
+
+/* ---------- DARK MODE CORREÇÕES DO DASHBOARD ---------- */
+[data-theme="dark"] .kanban-card {
+  background: #333333;
+  color: #f0f0f0;
+  border-color: #444;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+}
+
+[data-theme="dark"] .kanban-column {
+  background: rgba(30, 30, 30, 0.4);
+  color: #f0f0f0;
+}
+
+[data-theme="dark"] .kanban-col-header h3 {
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .notice-card {
+  background-color: #f5f0b5; /* Post-it clássico, mesmo no escuro, talvez um pouco menos brilhante */
+  color: #222;
+}
+
+[data-theme="dark"] .modal-content {
+  background: #2a2a2a;
+  color: #f0f0f0;
+  border: 1px solid #444;
+}
+
+[data-theme="dark"] .modal-content input,
+[data-theme="dark"] .modal-content select,
+[data-theme="dark"] .modal-content textarea {
+  background: #1a1a1a;
+  color: #fff;
+  border: 1px solid #555;
+}
+
+[data-theme="dark"] .stat-card {
+  background: linear-gradient(135deg, rgba(80,80,80,0.8), rgba(40,40,40,0.8));
+  color: #fff;
+  border: 1px solid #444;
+}
+
+[data-theme="dark"] .dashboard-stats {
+  opacity: 0.9;
+}

@@ -122,6 +122,32 @@ export const listarFases = (req, res) => {
 
   db.all('SELECT * FROM fases WHERE projeto_id = ? ORDER BY ordem', [projeto_id], (err, fases) => {
     if (err) return res.status(500).json({ erro: 'Erro ao listar fases' });
+    
+    // Se não tiver fase nenhuma, cria uma fase padrão "Fase Inicial" para evitar bugs no frontend (ex: Kanban)
+    if (!fases || fases.length === 0) {
+      db.run(
+        `INSERT INTO fases (projeto_id, nome, ordem, status, porcentagem) VALUES (?, ?, ?, ?, ?)`,
+        [projeto_id, 'Fase Inicial', 1, 'pendente', 0],
+        function(errInsert) {
+          if (errInsert) {
+            console.error('Erro ao auto-criar fase:', errInsert);
+            return res.json([]);
+          }
+          // Devolve a fase recém criada num array
+          return res.json([{
+            id: this.lastID,
+            projeto_id: parseInt(projeto_id),
+            nome: 'Fase Inicial',
+            ordem: 1,
+            status: 'pendente',
+            porcentagem: 0,
+            data_conclusao: null
+          }]);
+        }
+      );
+      return;
+    }
+
     res.json(fases || []);
   });
 };
@@ -155,21 +181,23 @@ export const deletarFase = (req, res) => {
 // ===== ATIVIDADES =====
 
 export const criarAtividade = (req, res) => {
-  const { fase_id, titulo, descricao, responsavel_id, prioridade, data_inicio, data_vencimento } = req.body;
+  const { fase_id, titulo, descricao, responsavel_id, prioridade, data_inicio, data_vencimento, status } = req.body;
 
   if (!fase_id || !titulo) {
     return res.status(400).json({ erro: 'Fase e título são obrigatórios' });
   }
 
+  const actStatus = status || 'pendente';
+
   db.run(
-    `INSERT INTO atividades (fase_id, titulo, descricao, responsavel_id, prioridade, data_inicio, data_vencimento)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    [fase_id, titulo, descricao, responsavel_id, prioridade, data_inicio, data_vencimento],
+    `INSERT INTO atividades (fase_id, titulo, descricao, responsavel_id, prioridade, data_inicio, data_vencimento, status)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    [fase_id, titulo, descricao, responsavel_id, prioridade, data_inicio, data_vencimento, actStatus],
     function(err) {
       if (err) return res.status(500).json({ erro: 'Erro ao criar atividade' });
       res.status(201).json({
         sucesso: true,
-        atividade: { id: this.lastID, fase_id, titulo, status: 'pendente' }
+        atividade: { id: this.lastID, fase_id, titulo, status: actStatus }
       });
     }
   );
@@ -186,12 +214,19 @@ export const listarAtividades = (req, res) => {
 
 export const atualizarAtividade = (req, res) => {
   const { id } = req.params;
-  const { titulo, status, concluida, observacoes } = req.body;
+  const { titulo, status, concluida, observacoes, descricao, prioridade, data_vencimento } = req.body;
 
   db.run(
-    `UPDATE atividades SET titulo=?, status=?, concluida=?, observacoes=?
+    `UPDATE atividades SET 
+      titulo = COALESCE(?, titulo), 
+      status = COALESCE(?, status), 
+      concluida = COALESCE(?, concluida), 
+      observacoes = COALESCE(?, observacoes),
+      descricao = COALESCE(?, descricao),
+      prioridade = COALESCE(?, prioridade),
+      data_vencimento = COALESCE(?, data_vencimento)
      WHERE id = ?`,
-    [titulo, status, concluida, observacoes, id],
+    [titulo, status, concluida, observacoes, descricao, prioridade, data_vencimento, id],
     function(err) {
       if (err) return res.status(500).json({ erro: 'Erro ao atualizar atividade' });
       if (this.changes === 0) return res.status(404).json({ erro: 'Atividade não encontrada' });

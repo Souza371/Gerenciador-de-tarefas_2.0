@@ -312,7 +312,8 @@ async function loadProjetosRecentes() {
 
     if (!response.ok) return;
 
-    const projetos = await response.json();
+    const data = await response.json();
+    projetos = data; // Atualiza a variável global para que o Kanban de Atividades ache os projetos!
     const container = document.querySelector('.projects-table');
 
     if (projetos.length === 0) {
