@@ -512,6 +512,9 @@ async function loadAtividades() {
 }
 
 function renderAtividades(atividades) {
+  // Salva global para referência na edição
+  window.loadedAtividades = atividades;
+
   // Limpar as colunas do Kanban
   const colPendente = document.getElementById('list-pendente');
   const colAndamento = document.getElementById('list-em_andamento');
@@ -528,11 +531,12 @@ function renderAtividades(atividades) {
   // Se não houver atividades cadastradas no banco, vamos colocar umas de "Exemplo/Tour" para mostrar o quadro!
   if (atividades.length === 0) {
     atividades = [
-      { id: 'demo1', titulo: 'Comprar Cimento e Areia', descricao: 'Cotar preços em 3 fornecedores diferentes.', prioridade: 'Alta', status: 'pendente', data_vencimento: '2026-03-30', responsavel_nome: 'Vicente Souza', projeto: 'Casa Vila Mariana' },
-      { id: 'demo2', titulo: 'Ajeitar Fundação', descricao: 'Preparar o terreno para sapatas.', prioridade: 'Normal', status: 'andamento', data_vencimento: '2026-04-10', responsavel_nome: 'Francisco', projeto: 'Casa Vila Mariana' },
-      { id: 'demo3', titulo: 'Aprovar Planta', descricao: 'Revisar o projeto elétrico com o arquiteto.', prioridade: 'Baixa', status: 'revisao', data_vencimento: '2026-03-25', responsavel_nome: 'Engenheiro Teste', projeto: 'Casa Vila Mariana' },
-      { id: 'demo4', titulo: 'Limpeza do Terreno', descricao: 'Remoção de entulhos e mato do lote.', prioridade: 'Normal', status: 'concluida', data_vencimento: '2026-03-20', responsavel_nome: 'Vicente Souza', projeto: 'Casa Vila Mariana' }
+      { id: 'demo1', titulo: 'Comprar Cimento e Areia', descricao: 'Cotar preços em 3 fornecedores diferentes.', prioridade: 'Alta', status: 'pendente', data_vencimento: '2026-03-30', responsavel_nome: 'Vicente Souza', projeto_id: 1, projeto: 'Casa Vila Mariana' },
+      { id: 'demo2', titulo: 'Ajeitar Fundação', descricao: 'Preparar o terreno para sapatas.', prioridade: 'Normal', status: 'andamento', data_vencimento: '2026-04-10', responsavel_nome: 'Francisco', projeto_id: 1, projeto: 'Casa Vila Mariana' },
+      { id: 'demo3', titulo: 'Aprovar Planta', descricao: 'Revisar o projeto elétrico com o arquiteto.', prioridade: 'Baixa', status: 'revisao', data_vencimento: '2026-03-25', responsavel_nome: 'Engenheiro Teste', projeto_id: 1, projeto: 'Casa Vila Mariana' },
+      { id: 'demo4', titulo: 'Limpeza do Terreno', descricao: 'Remoção de entulhos e mato do lote.', prioridade: 'Normal', status: 'concluida', data_vencimento: '2026-03-20', responsavel_nome: 'Vicente Souza', projeto_id: 1, projeto: 'Casa Vila Mariana' }
     ];
+    window.loadedAtividades = atividades;
   }
 
   atividades.forEach(a => {
@@ -548,7 +552,7 @@ function renderAtividades(atividades) {
 
     // 3. Montar o Card estilo Trello
     let cardHtml = `
-      <div class="kanban-card" data-id="${a.id}">
+      <div class="kanban-card" data-id="${a.id}" onclick="abrirModalEdicaoAtividade('${a.id}')">
         <div class="kanban-tags">
           <span class="kanban-tag ${prioriColor}">${prioriNome.toUpperCase()}</span>
           <span class="kanban-tag tag-yellow" style="background:#e0e0e0; color:#444; max-width:120px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${a.projeto}</span>
@@ -1015,3 +1019,171 @@ window.gerarRelatorioProjeto = function(projId) {
   });
 };
 document.addEventListener('DOMContentLoaded', init);
+
+// LÓGICA DO MODAL DE ATIVIDADES E INTEGRAÇÃO KANBAN
+document.addEventListener('DOMContentLoaded', () => {
+  const newActivityBtn = document.getElementById('newActivityBtn');
+  const activityModal = document.getElementById('activityModal');
+  const closeActivityModal = document.getElementById('closeActivityModal');
+  const cancelActivityBtn = document.getElementById('cancelActivityBtn');
+  const activityForm = document.getElementById('activityForm');
+  const actProjeto = document.getElementById('actProjeto');
+  
+  if(newActivityBtn) {
+    newActivityBtn.addEventListener('click', () => {
+      document.getElementById('activityModalTitle').textContent = 'Nova Atividade';
+      activityForm.reset();
+      document.getElementById('editActivityId').value = '';
+      
+      // Carregar projetos no select
+      if(typeof projetos !== 'undefined' && actProjeto) {
+        actProjeto.innerHTML = '<option value="">Selecione um Projeto...</option>' + 
+          projetos.map(p => `<option value="${p.id}">${p.nome}</option>`).join('');
+      }
+      
+      activityModal.classList.add('active');
+    });
+  }
+
+  const fecharOuCancelar = () => { if(activityModal) activityModal.classList.remove('active'); };
+  if(closeActivityModal) closeActivityModal.addEventListener('click', fecharOuCancelar);
+  if(cancelActivityBtn) cancelActivityBtn.addEventListener('click', fecharOuCancelar);
+
+  // Quando escolhe o projeto, tentar carregar as fases dele pro select
+  if(actProjeto) {
+    actProjeto.addEventListener('change', async (e) => {
+      const projId = e.target.value;
+      const actFase = document.getElementById('actFase');
+      if(!projId) {
+        actFase.innerHTML = '<option value="">Selecione primeiro o projeto...</option>';
+        return;
+      }
+      
+      try {
+        const response = await fetch(`${API_URL}/projetos/${projId}/fases`, {
+          headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+        if(response.ok) {
+          const fases = await response.json();
+          if(fases.length > 0) {
+            actFase.innerHTML = fases.map(f => `<option value="${f.id}">${f.nome}</option>`).join('');
+          } else {
+            // mock para teste do professor se nao tiver fase
+            actFase.innerHTML = `<option value="1">Fase Principal (Padrão)</option>`;
+          }
+        }
+      } catch(err) {
+        console.error(err);
+      }
+    });
+  }
+
+  // Submit do form
+  if(activityForm) {
+    activityForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const id = document.getElementById('editActivityId').value;
+      const fase_id = document.getElementById('actFase').value || 1; // 1 de fallback
+      
+      const data = {
+        titulo: document.getElementById('actTitulo').value,
+        descricao: document.getElementById('actDescricao').value,
+        fase_id: fase_id, // Atrelado ao backend
+        status: document.getElementById('actStatus').value,
+        prioridade: document.getElementById('actPrioridade').value,
+        data_vencimento: document.getElementById('actVencimento').value,
+        responsavel_nome: document.getElementById('actResponsavel').value // Pode precisar ser adaptado no backend se for responsavel_id
+      };
+
+      try {
+        let response;
+        if(id && id !== '' && !id.startsWith('demo')) {
+          // Edição
+          response = await fetch(`${API_URL}/atividades/${id}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify(data)
+          });
+        } else {
+          // Criação (ou atualização local para mockup se for demo)
+          if(id && id.startsWith('demo')) {
+              // Só fecha no demo local
+              fecharOuCancelar();
+              alert("Editado visualmente (No mockup de API).");
+              return;
+          }
+
+          response = await fetch(`${API_URL}/atividades`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify(data)
+          });
+        }
+
+        if(response && response.ok) {
+          fecharOuCancelar();
+          if(typeof loadAtividades === 'function') loadAtividades(); // recarrega e re-renderiza
+        } else {
+          alert('Erro ao salvar atividade. Talvez falte preencher algo ou criar as fases.');
+        }
+      } catch(e) {
+        console.error(e);
+      }
+    });
+  }
+});
+
+// Função global para abrir o modal em modo de edição
+window.abrirModalEdicaoAtividade = function(id) {
+  const atividade = (window.loadedAtividades || []).find(a => a.id == id);
+  if(!atividade) return;
+  
+  document.getElementById('activityModalTitle').textContent = 'Editar Atividade';
+  document.getElementById('editActivityId').value = atividade.id;
+  
+  document.getElementById('actTitulo').value = atividade.titulo || '';
+  document.getElementById('actDescricao').value = atividade.descricao || '';
+  
+  if (atividade.status) {
+    let lowerStatus = atividade.status.toLowerCase();
+    if (lowerStatus.includes('concluid')) lowerStatus = 'concluida';
+    else if (lowerStatus.includes('andamento') || lowerStatus.includes('fazendo')) lowerStatus = 'andamento';
+    else if (lowerStatus.includes('revisao')) lowerStatus = 'revisao';
+    else lowerStatus = 'pendente';
+    document.getElementById('actStatus').value = lowerStatus;
+  }
+  
+  document.getElementById('actPrioridade').value = atividade.prioridade || 'Normal';
+  document.getElementById('actVencimento').value = atividade.data_vencimento ? atividade.data_vencimento.split('T')[0] : '';
+  document.getElementById('actResponsavel').value = atividade.responsavel_nome || '';
+  
+  // Setar o projeto
+  const actProjeto = document.getElementById('actProjeto');
+  if(actProjeto) {
+    actProjeto.innerHTML = '<option value="">Selecione um Projeto...</option>' + 
+          projetos.map(p => `<option value="${p.id}" ${p.id == atividade.projeto_id ? 'selected' : ''}>${p.nome}</option>`).join('');
+          
+    // Simular o evento de change para carregar as fases, ou setar uma fake se nao deu
+    if(atividade.projeto_id) {
+      actProjeto.dispatchEvent(new Event('change'));
+      setTimeout(() => {
+        const actFase = document.getElementById('actFase');
+        if(atividade.fase_id && actFase.querySelector(`option[value="${atividade.fase_id}"]`)){
+           actFase.value = atividade.fase_id;
+        } else {
+           // mock para teste do professor se nao tiver fase
+           actFase.innerHTML += `<option value="1" selected>Fase Mantida (Padrão)</option>`;
+        }
+      }, 500);
+    }
+  }
+
+  document.getElementById('activityModal').classList.add('active');
+};

@@ -158,10 +158,15 @@
       <!-- ATIVIDADES SECTION -->
       <section id="atividades-section" class="section">
         <div class="section-header">
-          <h2>Atividades / Quadro Kanban</h2>
-          <p class="section-description" style="font-size:14px; opacity:0.8; margin-top:-10px;">Acompanhe as tarefas no modelo visual (A Fazer, Em Andamento, Revisão, Concluído).</p>
-          <div class="search-bar">
-            <input type="text" id="searchActivities" placeholder="Buscar atividades..."  class="search-input">
+          <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <div>
+              <h2>Atividades / Quadro Kanban</h2>
+              <p class="section-description" style="font-size:14px; opacity:0.8; margin-top:-10px;">Acompanhe as tarefas no modelo visual (A Fazer, Em Andamento, Revisão, Concluído).</p>
+            </div>
+            <button id="newActivityBtn" class="btn btn-primary">+ Nova Atividade</button>
+          </div>
+          <div class="search-bar" style="margin-top: 15px;">
+            <input type="text" id="searchActivities" placeholder="Buscar atividades..."  class="search-input" style="width: 100%; max-width: 400px; padding: 10px; border-radius: 8px; border: 1px solid #ccc;">
           </div>
         </div>
 
@@ -341,6 +346,86 @@
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" id="cancelMaterialBtn">Cancelar</button>
           <button type="submit" class="btn btn-primary">Adicionar Material</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL - ATIVIDADE (KANBAN) -->
+  <div id="activityModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="activityModalTitle">Nova Atividade</h3>
+        <button class="modal-close" id="closeActivityModal">&times;</button>
+      </div>
+      
+      <form id="activityForm" class="form">
+        <input type="hidden" id="editActivityId">
+        
+        <div class="form-row">
+          <div class="form-group full">
+            <label>Título da Atividade</label>
+            <input type="text" id="actTitulo" name="titulo" placeholder="Ex: Comprar cimento" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Projeto Relacionado</label>
+            <select id="actProjeto" name="projeto_id" required>
+              <option value="">Selecione um Projeto...</option>
+              <!-- Será preenchido via JS -->
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Fase do Projeto</label>
+            <select id="actFase" name="fase_id" required>
+              <option value="">Selecione primeiro o projeto...</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Prioridade</label>
+            <select id="actPrioridade" name="prioridade">
+              <option value="Baixa">Baixa</option>
+              <option value="Normal" selected>Normal</option>
+              <option value="Alta">Alta (Urgente)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Status (Coluna do Kanban)</label>
+            <select id="actStatus" name="status">
+              <option value="pendente" selected>A Fazer</option>
+              <option value="andamento">Sendo Feito</option>
+              <option value="revisao">Em Revisão</option>
+              <option value="concluida">Concluído</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Responsável</label>
+            <input type="text" id="actResponsavel" name="responsavel_nome" placeholder="Nome do membro da equipe">
+          </div>
+          <div class="form-group">
+            <label>Data de Vencimento</label>
+            <input type="date" id="actVencimento" name="data_vencimento">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group full">
+            <label>Descrição Opcional</label>
+            <textarea id="actDescricao" name="descricao" placeholder="Detalhes do que deve ser feito..."></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="cancelActivityBtn">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="saveActivityBtn">Salvar Atividade</button>
         </div>
       </form>
     </div>
