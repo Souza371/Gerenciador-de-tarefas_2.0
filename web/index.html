@@ -183,27 +183,31 @@
         <!-- QUADRO KANBAN -->
         <div class="kanban-board" id="kanbanBoard">
           <!-- Coluna A Fazer -->
-          <div class="kanban-column" id="col-pendente">
+          <div class="kanban-column" id="col-pendente" ondragover="permitirSoltar(event)" ondrop="soltarCartao(event, 'pendente')" ondragenter="destacarColuna(event)" ondragleave="removerDestaqueColuna(event)">
             <div class="kanban-header">📝 A Fazer</div>
             <div class="kanban-cards" id="list-pendente"></div>
+            <div class="kanban-add-btn" onclick="abrirModalNovaAtividadeStatus('pendente')">➕ Adicionar Tarefa</div>
           </div>
           
           <!-- Coluna Em Andamento -->
-          <div class="kanban-column" id="col-em_andamento">
+          <div class="kanban-column" id="col-em_andamento" ondragover="permitirSoltar(event)" ondrop="soltarCartao(event, 'andamento')" ondragenter="destacarColuna(event)" ondragleave="removerDestaqueColuna(event)">
             <div class="kanban-header">⏳ Sendo Feito</div>
             <div class="kanban-cards" id="list-em_andamento"></div>
+            <div class="kanban-add-btn" onclick="abrirModalNovaAtividadeStatus('andamento')">➕ Adicionar Tarefa</div>
           </div>
           
           <!-- Coluna Em Revisão -->
-          <div class="kanban-column" id="col-revisao">
+          <div class="kanban-column" id="col-revisao" ondragover="permitirSoltar(event)" ondrop="soltarCartao(event, 'revisao')" ondragenter="destacarColuna(event)" ondragleave="removerDestaqueColuna(event)">
             <div class="kanban-header">🔍 Em Revisão</div>
             <div class="kanban-cards" id="list-revisao"></div>
+            <div class="kanban-add-btn" onclick="abrirModalNovaAtividadeStatus('revisao')">➕ Adicionar Tarefa</div>
           </div>
           
           <!-- Coluna Concluído -->
-          <div class="kanban-column" id="col-concluida">
+          <div class="kanban-column" id="col-concluida" ondragover="permitirSoltar(event)" ondrop="soltarCartao(event, 'concluida')" ondragenter="destacarColuna(event)" ondragleave="removerDestaqueColuna(event)">
             <div class="kanban-header">✅ Concluído</div>
             <div class="kanban-cards" id="list-concluida"></div>
+            <div class="kanban-add-btn" onclick="abrirModalNovaAtividadeStatus('concluida')">➕ Adicionar Tarefa</div>
           </div>
         </div>
       </section>

@@ -553,7 +553,10 @@ function renderAtividades(atividades) {
 
     // 3. Montar o Card estilo Trello
     let cardHtml = `
-      <div class="kanban-card" data-id="${a.id}" onclick="abrirModalEdicaoAtividade('${a.id}')">
+      <div class="kanban-card" draggable="true" data-id="${a.id}" 
+           ondragstart="arrastarCartao(event)" 
+           ondragend="finalizarArrastarCartao(event)"
+           onclick="abrirModalEdicaoAtividade('${a.id}')">
         <div class="kanban-tags">
           <span class="kanban-tag ${prioriColor}">${prioriNome.toUpperCase()}</span>
           <span class="kanban-tag tag-yellow" style="background:#e0e0e0; color:#444; max-width:120px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${a.projeto}</span>
@@ -1188,3 +1191,81 @@ window.abrirModalEdicaoAtividade = function(id) {
 
   document.getElementById('activityModal').classList.add('active');
 };
+
+// ----------------------------------------------------
+// DRAG AND DROP - KANBAN DYNAMICS
+// ----------------------------------------------------
+window.arrastarCartao = function(event) {
+  event.dataTransfer.setData("text", event.target.getAttribute('data-id'));
+  event.target.style.opacity = '0.5';
+}
+
+window.finalizarArrastarCartao = function(event) {
+  event.target.style.opacity = '1';
+}
+
+window.permitirSoltar = function(event) {
+  event.preventDefault();
+}
+
+window.destacarColuna = function(event) {
+  const col = event.target.closest('.kanban-column');
+  if(col) col.classList.add('drag-over');
+}
+
+window.removerDestaqueColuna = function(event) {
+  const col = event.target.closest('.kanban-column');
+  if(col) col.classList.remove('drag-over');
+}
+
+window.soltarCartao = async function(event, novoStatus) {
+  event.preventDefault();
+  const col = event.target.closest('.kanban-column');
+  if(col) col.classList.remove('drag-over');
+
+  const idAtividade = event.dataTransfer.getData("text");
+  if(!idAtividade) return;
+
+  // Atualiza visualmente primeiro (Otimista)
+  const cartaoElement = document.querySelector(`.kanban-card[data-id="\${idAtividade}"]`);
+  let listElement = document.getElementById(`list-\${novoStatus}`);
+  if(!listElement && novoStatus === 'andamento') listElement = document.getElementById('list-em_andamento');
+
+  if(cartaoElement && listElement) {
+    listElement.appendChild(cartaoElement);
+  }
+
+  // Faz a chamada na API se não for dado de demonstração
+  if(idAtividade.startsWith('demo')) {
+    console.log("Mock drag and drop ok.");
+    return;
+  }
+
+  try {
+    const data = { status: novoStatus };
+    const res = await fetch(`\${API_URL}/atividades/\${idAtividade}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer \${authToken}`
+      },
+      body: JSON.stringify(data)
+    });
+    
+    if(!res.ok) {
+       console.error("Erro ao atualizar no backend. Recarregando Atividades...");
+       if(typeof loadAtividades === 'function') loadAtividades();
+    }
+  } catch(e) {
+    console.error("Erro na request:", e);
+  }
+}
+
+window.abrirModalNovaAtividadeStatus = function(statusDesejado) {
+  document.getElementById('newActivityBtn').click();
+  // Da um tempo pro modal abrir e depois seta o status programaticamente
+  setTimeout(() => {
+    let select = document.getElementById('actStatus');
+    if(select) select.value = statusDesejado === 'andamento' ? 'em_andamento' : statusDesejado;
+  }, 150);
+}

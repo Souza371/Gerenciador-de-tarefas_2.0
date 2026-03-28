@@ -1268,3 +1268,45 @@ td .status-badge:not(.status-planejamento):not(.status-concluido) {
 [data-theme="dark"] .dashboard-stats {
   opacity: 0.9;
 }
+
+/* ---------- MELHORIAS VISUAIS NO KANBAN (Diferenciação do fundo branco) ---------- */
+.kanban-column {
+  background-color: #ebecf0 !important; /* Mais cinza para destacar das as coisas brancas */
+  border-top: 5px solid var(--primary-color); /* Laranja forte no topo */
+  box-shadow: 0 4px 6px rgba(0,0,0,0.06);     /* Sombra sutil para não parecer colado no fundo */
+}
+.kanban-header {
+  color: var(--primary-color) !important;
+  font-size: 1.1em;
+  font-weight: bold;
+}
+.kanban-column.drag-over {
+  background-color: #dfe1e6 !important;
+  border: 2px dashed var(--primary-color);
+}
+.kanban-add-btn {
+  margin-top: 10px;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #5e6c84;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: background 0.2s, color 0.2s;
+}
+.kanban-add-btn:hover {
+  background-color: rgba(9, 30, 66, 0.08);
+  color: #172b4d;
+}
+[data-theme="dark"] .kanban-column {
+  background-color: rgba(30, 30, 30, 0.6) !important;
+  border-top: 5px solid var(--secondary-color) !important;
+}
+[data-theme="dark"] .kanban-header {
+  color: var(--secondary-color) !important;
+}
+[data-theme="dark"] .kanban-add-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
