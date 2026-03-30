@@ -252,6 +252,164 @@ function handleLogout() {
   showLogin();
 }
 
+// ===== SISTEMA DE CHAT =====
+let conversas = [];
+let conversaAtual = null;
+let mensagensConversa = [];
+
+// Simular dados de chat (em produção viriam da API)
+function inicializarChat() {
+  conversas = [
+    { id: 1, nome: 'João Carlos', avatar: 'JC', role: 'Engenheiro', online: true, ultimaMensagem: 'Finalizei a inspeção!', hora: '10:30' },
+    { id: 2, nome: 'Carlos Matos', avatar: 'CM', role: 'Técnico', online: true, ultimaMensagem: 'Material chegou...', hora: '10:00' },
+    { id: 3, nome: 'Equipe Reforma Centro', avatar: '👥', role: 'Grupo', online: true, ultimaMensagem: 'Como ficou o andamento...', hora: '09:45' }
+  ];
+  
+  renderizarConversas();
+}
+
+function renderizarConversas() {
+  const container = document.getElementById('chatConversations');
+  if (!container) return;
+  
+  container.innerHTML = conversas.map(conversa => `
+    <div onclick="selecionarConversa(${conversa.id})" style="padding: 12px; background: white; border-radius: 6px; cursor: pointer; margin-bottom: 10px; border: 2px solid transparent; transition: all 0.3s; ${conversaAtual?.id === conversa.id ? 'border-color: #667eea; background: #f0f3ff;' : 'hover: border-color: #ddd;'}">
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+        <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px;">${conversa.avatar}</div>
+        <div style="flex: 1;">
+          <div style="font-weight: 600; font-size: 14px;">${conversa.nome}</div>
+          <small style="color: #999; font-size: 11px;">${conversa.role}</small>
+        </div>
+        <div style="width: 8px; height: 8px; border-radius: 50%; background: ${conversa.online ? '#28a745' : '#999'};"></div>
+      </div>
+      <small style="color: #999; display: block;">${conversa.ultimaMensagem}</small>
+      <small style="color: #bbb; display: block;">${conversa.hora}</small>
+    </div>
+  `).join('');
+}
+
+function selecionarConversa(id) {
+  conversaAtual = conversas.find(c => c.id === id);
+  if (!conversaAtual) return;
+  
+  // Atualizar header
+  const header = document.getElementById('chatHeader');
+  const messages = document.getElementById('chatMessages');
+  
+  header.innerHTML = `
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div style="width: 45px; height: 45px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px;">${conversaAtual.avatar}</div>
+      <div>
+        <h3 style="margin: 0; font-size: 16px;">${conversaAtual.nome}</h3>
+        <small style="color: #999;">${conversaAtual.online ? '🟢 Online' : '⚫ Offline'}</small>
+      </div>
+    </div>
+  `;
+  
+  // Simular mensagens
+  mensagensConversa = [
+    { tipo: 'other', avatar: conversaAtual.avatar, nome: conversaAtual.nome, texto: 'Oi! Como vai?', hora: '09:00' },
+    { tipo: 'own', avatar: 'VS', nome: 'Você', texto: 'Ótimo! E você?', hora: '09:05' },
+    { tipo: 'other', avatar: conversaAtual.avatar, nome: conversaAtual.nome, texto: conversaAtual.ultimaMensagem, hora: conversaAtual.hora }
+  ];
+  
+  renderizarMensagens();
+  
+  // Habilitar input
+  document.getElementById('chatInput').disabled = false;
+  document.getElementById('chatSendBtn').disabled = false;
+  
+  renderizarConversas();
+}
+
+function renderizarMensagens() {
+  const container = document.getElementById('chatMessages');
+  container.innerHTML = mensagensConversa.map(msg => `
+    <div style="display: flex; ${msg.tipo === 'own' ? 'justify-content: flex-end;' : ''} margin-bottom: 15px;">
+      ${msg.tipo === 'other' ? `<div style="width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; flex-shrink: 0; margin-right: 8px;">${msg.avatar}</div>` : ''}
+      <div style="max-width: 70%; background: ${msg.tipo === 'own' ? 'linear-gradient(135deg, #667eea, #764ba2)' : '#f0f0f0'}; color: ${msg.tipo === 'own' ? 'white' : '#333'}; padding: 10px 14px; border-radius: 12px; word-wrap: break-word;">
+        <div style="font-size: 13px;">${msg.texto}</div>
+        <small style="font-size: 11px; opacity: 0.7; display: block; margin-top: 4px;">${msg.hora}</small>
+      </div>
+    </div>
+  `).join('');
+  
+  container.scrollTop = container.scrollHeight;
+}
+
+function enviarMensagem() {
+  const input = document.getElementById('chatInput');
+  const texto = input.value.trim();
+  
+  if (!texto || !conversaAtual) return;
+  
+  // Adicionar mensagem à conversa
+  mensagensConversa.push({
+    tipo: 'own',
+    avatar: 'VS',
+    nome: 'Você',
+    texto: texto,
+    hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  });
+  
+  input.value = '';
+  renderizarMensagens();
+  
+  // Simular resposta automática após 1 segundo
+  setTimeout(() => {
+    mensagensConversa.push({
+      tipo: 'other',
+      avatar: conversaAtual.avatar,
+      nome: conversaAtual.nome,
+      texto: '👍 Entendi! Vou verificar isso.',
+      hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    });
+    renderizarMensagens();
+  }, 1000);
+}
+
+// ===== EVENT LISTENERS PARA CHAT =====
+window.addEventListener('load', () => {
+  inicializarChat();
+  
+  const chatInput = document.getElementById('chatInput');
+  const chatSendBtn = document.getElementById('chatSendBtn');
+  const dropZone = document.getElementById('dropZone');
+  const fileUpload = document.getElementById('fileUpload');
+  
+  if (chatInput && chatSendBtn) {
+    chatInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') enviarMensagem();
+    });
+    chatSendBtn.addEventListener('click', enviarMensagem);
+  }
+  
+  // Drag and Drop para upload de fotos
+  if (dropZone && fileUpload) {
+    dropZone.addEventListener('click', () => fileUpload.click());
+    
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.style.background = '#f0f3ff';
+      dropZone.style.borderColor = '#667eea';
+    });
+    
+    dropZone.addEventListener('dragleave', () => {
+      dropZone.style.background = 'white';
+      dropZone.style.borderColor = '#667eea';
+    });
+    
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.style.background = 'white';
+      fileUpload.files = e.dataTransfer.files;
+      simularUploadArquivos();
+    });
+    
+    fileUpload.addEventListener('change', simularUploadArquivos);
+  }
+});
+
 // ===== TELAS =====
 function showLogin() {
   loginScreen.classList.add('active');
@@ -280,6 +438,8 @@ function switchSection(section) {
     loadAtividades();
   } else if (section === 'materiais') {
     loadMateriais();
+  } else if (section === 'chat') {
+    inicializarChat();
   }
 }
 
@@ -756,6 +916,98 @@ window.abrirModalEdicao = function(projId) {
 
   modal.classList.add('active');
 };
+
+// ===== FUNÇÕES DE UPLOAD DE FOTOS/DOCUMENTOS =====
+function simularUploadArquivos() {
+  const fileUpload = document.getElementById('fileUpload');
+  const progressBar = document.getElementById('uploadProgress');
+  const progressBarElement = document.getElementById('progressBar');
+  const progressText = document.getElementById('progressText');
+  const files = fileUpload.files;
+  
+  if (files.length === 0) return;
+  
+  progressBar.style.display = 'block';
+  
+  let progress = 0;
+  const interval = setInterval(() => {
+    progress += Math.random() * 30;
+    if (progress > 100) progress = 100;
+    
+    progressBarElement.style.width = progress + '%';
+    progressText.textContent = `Enviando... ${Math.round(progress)}%`;
+    
+    if (progress === 100) {
+      clearInterval(interval);
+      
+      setTimeout(() => {
+        progressBar.style.display = 'none';
+        progressBarElement.style.width = '0%';
+        
+        // Adicionar arquivos à galeria
+        for (let file of files) {
+          if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              const galeria = document.getElementById('fotosGaleria');
+              galeria.innerHTML += `
+                <div style="position: relative; border-radius: 6px; overflow: hidden; cursor: pointer; background: #f0f0f0; aspect-ratio: 1;">
+                  <img src="${e.target.result}" alt="Foto" style="width: 100%; height: 100%; object-fit: cover;" onclick="visualizarFoto('${e.target.result}')">
+                  <button onclick="removerFoto(this)" style="position: absolute; top: 5px; right: 5px; background: #dc3545; color: white; border: none; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; font-size: 16px;">×</button>
+                  <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.7); color: white; padding: 5px; font-size: 10px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${file.name}</div>
+                </div>
+              `;
+            };
+            reader.readAsDataURL(file);
+          } else if (file.type === 'application/pdf') {
+            const documentos = document.getElementById('documentosLista');
+            documentos.innerHTML += `
+              <div style="padding: 12px; background: #f8f9fa; border-radius: 6px; border-left: 4px solid #667eea; display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
+                  <span style="font-size: 24px;">📄</span>
+                  <div>
+                    <div style="font-weight: 600; font-size: 13px;">${file.name}</div>
+                    <small style="color: #999;">${(file.size / 1024).toFixed(2)} KB</small>
+                  </div>
+                </div>
+                <div style="display: flex; gap: 5px;">
+                  <button onclick="baixarDocumento('${file.name}')" style="padding: 6px 12px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">⬇️ Baixar</button>
+                  <button onclick="removerDocumento(this)" style="padding: 6px 12px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">🗑️</button>
+                </div>
+              </div>
+            `;
+          }
+        }
+        
+        showAlert('✅ ' + files.length + ' arquivo(s) adicionado(s) com sucesso!', 'success');
+        fileUpload.value = '';
+      }, 500);
+    }
+  }, 100);
+}
+
+function visualizarFoto(src) {
+  const modal = document.getElementById('photoViewerModal');
+  const img = document.getElementById('photoViewerImage');
+  img.src = src;
+  modal.style.display = 'flex';
+  modal.style.justifyContent = 'center';
+  modal.style.alignItems = 'center';
+}
+
+function removerFoto(btn) {
+  btn.parentElement.remove();
+  showAlert('✅ Foto removida', 'success');
+}
+
+function removerDocumento(btn) {
+  btn.parentElement.parentElement.remove();
+  showAlert('✅ Documento removido', 'success');
+}
+
+function baixarDocumento(nome) {
+  showAlert('✅ Download do documento: ' + nome, 'success');
+}
 
 window.salvarFotoDoc = function() {
   showAlert('✅ Foto/Documento salvo com sucesso no projeto (Simulação interna concluída)', 'success');
