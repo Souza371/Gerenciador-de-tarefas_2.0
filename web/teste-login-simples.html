@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Teste Simples de Login</title>
+  <style>
+    body {
+      font-family: Arial;
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #f0f0f0;
+    }
+    .box {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    #resultado {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 4px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      display: none;
+    }
+    .sucesso {
+      background: #d4edda;
+      border: 1px solid #28a745;
+      color: #155724;
+      display: block;
+    }
+    .erro {
+      background: #f8d7da;
+      border: 1px solid #dc3545;
+      color: #721c24;
+      display: block;
+    }
+    .carregando {
+      background: #cfe2ff;
+      border: 1px solid #0d6efd;
+      color: #084298;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h1>🔐 Teste de Login</h1>
+    
+    <input type="email" id="email" placeholder="Email (vicentedesouza762@gmail.com)" value="vicentedesouza762@gmail.com">
+    <input type="password" id="senha" placeholder="Senha (Admin@2026)" value="Admin@2026">
+    
+    <button onclick="fazerLogin()">Testar Login</button>
+    
+    <div id="resultado"></div>
+
+    <hr>
+    <h3>ℹ️ Informações:</h3>
+    <p><strong>API URL:</strong> http://localhost:5000/api</p>
+    <p><strong>Porta 5000:</strong> <span id="portStatus">Verificando...</span></p>
+  </div>
+
+  <script>
+    const API_URL = 'http://localhost:5000/api';
+
+    async function verificarPorta() {
+      try {
+        const response = await fetch(`${API_URL}/health`);
+        document.getElementById('portStatus').innerHTML = '✅ Backend respondendo';
+        document.getElementById('portStatus').style.color = 'green';
+      } catch (e) {
+        document.getElementById('portStatus').innerHTML = '❌ Backend NÃO responde - Backend pode estar desligado!';
+        document.getElementById('portStatus').style.color = 'red';
+      }
+    }
+
+    async function fazerLogin() {
+      const email = document.getElementById('email').value;
+      const senha = document.getElementById('senha').value;
+      const resultado = document.getElementById('resultado');
+
+      resultado.className = 'carregando';
+      resultado.textContent = '⏳ Conectando...';
+      resultado.style.display = 'block';
+
+      try {
+        console.log('📤 Enviando requisição para:', `${API_URL}/auth/login`);
+        console.log('📋 Dados:', { email, senha });
+
+        const response = await fetch(`${API_URL}/auth/login`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email, senha })
+        });
+
+        console.log('📬 Resposta recebida:', response.status);
+        
+        const data = await response.json();
+        console.log('📦 Dados da resposta:', data);
+
+        if (!response.ok) {
+          resultado.className = 'erro';
+          resultado.textContent = `❌ ERRO ${response.status}\n\n${JSON.stringify(data, null, 2)}`;
+        } else {
+          resultado.className = 'sucesso';
+          resultado.textContent = `✅ LOGIN SUCESSO!\n\nToken: ${data.token.substring(0, 50)}...\n\nUsuário: ${data.usuario.nome}\nEmail: ${data.usuario.email}\nRole: ${data.usuario.role}`;
+        }
+      } catch (err) {
+        console.error('🔴 Erro capturado:', err);
+        resultado.className = 'erro';
+        resultado.textContent = `🔴 ERRO DE CONEXÃO\n\nMensagem: ${err.message}\nTipo: ${err.constructor.name}\n\n⚠️ POSSÍVEIS CAUSAS:\n1. Backend NÃO está rodando\n2. Porta 5000 está bloqueada\n3. Problema de rede/CORS\n\n💡 Dica: Abra o F12 > Console para ver mais detalhes`;
+      }
+    }
+
+    // Verificar porta ao carregar
+    window.addEventListener('load', verificarPorta);
+  </script>
+</body>
+</html>

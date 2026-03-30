@@ -209,16 +209,21 @@ async function handleLogin(e) {
   const password = document.getElementById('password').value;
 
   try {
+    console.log('📤 Tentando conectar em:', API_URL + '/auth/login');
+    
     const response = await fetch(`${API_URL}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, senha: password })
     });
 
+    console.log('📬 Resposta HTTP:', response.status);
+    
     const data = await response.json();
 
     if (!response.ok) {
       showAlert('❌ ' + (data.erro || 'Erro ao fazer login'), 'error');
+      console.error('Erro de login:', data);
       return;
     }
 
@@ -232,7 +237,9 @@ async function handleLogin(e) {
     loadDashboard();
     loadProjetos();
   } catch (err) {
-    showAlert('❌ Erro de conexão', 'error');
+    console.error('❌ Erro de conexão:', err.message);
+    console.error('Tipo de erro:', err.constructor.name);
+    showAlert('❌ Erro de conexão: ' + err.message + '\n\n⚠️ Verifique se o backend está rodando em http://localhost:5000\n💡 Abra F12 > Console para mais detalhes', 'error');
   }
 }
 

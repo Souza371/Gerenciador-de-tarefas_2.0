@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>Gerenciador de Tarefas 2.0 - VERSÃO LIMPA</title>
+  <link rel="stylesheet" href="styles-vf.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+  <!-- TELA DE LOGIN -->
+  <div id="loginScreen" class="screen active">
+    <div class="login-container">
+      <div class="login-box">
+        <div class="logo">
+          <h1>🏗️ Gerenciador de Tarefas 2.0</h1>
+          <p>O Sistema de Obras Completo</p>
+        </div>
+        
+        <form id="loginForm">
+          <div class="form-group">
+            <label for="email">E-mail</label>
+            <input type="email" id="email" placeholder="seu@email.com" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="password">Senha</label>
+            <div class="password-wrapper">
+              <input type="password" id="password" placeholder="Sua senha" required>
+              <button type="button" id="togglePassword" class="toggle-password" title="Mostrar/Ocultar senha">
+                <span id="monkeyIcon">🙈</span> <span id="passwordStatusText" style="font-size: 12px; margin-left: 4px;">Oculto</span>
+              </button>
+            </div>
+          </div>
+          
+          <button type="submit" style="width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 10px;">
+            🔐 Entrar
+          </button>
+
+          <div id="alertContainer" style="margin-top: 15px;"></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- TELA DE DASHBOARD -->
+  <div id="dashboardScreen" class="screen">
+    <div class="container">
+      <h1>Carregando...</h1>
+    </div>
+  </div>
+
+  <script>
+    // ===== CONFIGURAÇÃO =====
+    const API_URL = 'http://localhost:5000/api';
+    const API_TIMEOUT = 10000; // 10 segundos
+    
+    let authToken = localStorage.getItem('token');
+    let currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+
+    // ===== DOM =====
+    const loginScreen = document.getElementById('loginScreen');
+    const dashboardScreen = document.getElementById('dashboardScreen');
+    const loginForm = document.getElementById('loginForm');
+    const alertContainer = document.getElementById('alertContainer');
+    const togglePasswordBtn = document.getElementById('togglePassword');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+
+    // ===== INICIALIZAÇÃO =====
+    function init() {
+      console.log('🚀 Inicializando aplicação...');
+      console.log('API URL:', API_URL);
+      console.log('Token armazenado:', authToken ? 'SIM' : 'NÃO');
+      console.log('Usuário armazenado:', currentUser ? currentUser.email : 'NÃO');
+      
+      if (authToken && currentUser) {
+        showDashboard();
+      } else {
+        showLogin();
+      }
+      
+      attachEventListeners();
+    }
+
+    // ===== EVENT LISTENERS =====
+    function attachEventListeners() {
+      loginForm?.addEventListener('submit', handleLogin);
+      togglePasswordBtn?.addEventListener('click', togglePassword);
+    }
+
+    function togglePassword() {
+      const isPassword = passwordInput.getAttribute('type') === 'password';
+      const newType = isPassword ? 'text' : 'password';
+      passwordInput.setAttribute('type', newType);
+      
+      const monkeyIcon = document.getElementById('monkeyIcon');
+      const passwordStatusText = document.getElementById('passwordStatusText');
+      
+      if (monkeyIcon) monkeyIcon.textContent = isPassword ? '🐵' : '🙈';
+      if (passwordStatusText) passwordStatusText.textContent = isPassword ? 'Visível' : 'Oculto';
+    }
+
+    // ===== ALERTAS =====
+    function showAlert(mensagem, tipo = 'error') {
+      alertContainer.innerHTML = '';
+      const alertDiv = document.createElement('div');
+      alertDiv.className = `alert alert-${tipo}`;
+      alertDiv.style.cssText = `
+        padding: 12px;
+        border-radius: 4px;
+        margin-bottom: 15px;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        font-size: 14px;
+      `;
+      
+      if (tipo === 'error') {
+        alertDiv.style.cssText += 'background: #f8d7da; border: 1px solid #dc3545; color: #721c24;';
+      } else {
+        alertDiv.style.cssText += 'background: #d4edda; border: 1px solid #28a745; color: #155724;';
+      }
+      
+      alertDiv.textContent = mensagem;
+      alertContainer.appendChild(alertDiv);
+      
+      console.log(`[${tipo.toUpperCase()}] ${mensagem}`);
+    }
+
+    // ===== LOGIN COM TIMEOUT =====
+    async function handleLogin(e) {
+      e.preventDefault();
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+
+      if (!email || !password) {
+        showAlert('❌ Preencha email e senha', 'error');
+        return;
+      }
+
+      showAlert('⏳ Conectando ao servidor...', 'info');
+      
+      try {
+        console.log('📤 Requisição POST para:', `${API_URL}/auth/login`);
+        console.log('📋 Payload:', { email, senha: password });
+
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), API_TIMEOUT);
+
+        const response = await fetch(`${API_URL}/auth/login`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({ email, senha: password }),
+          signal: controller.signal
+        });
+
+        clearTimeout(timeout);
+
+        console.log('📬 Status HTTP:', response.status);
+        console.log('📦 Headers:', Object.fromEntries(response.headers.entries()));
+
+        let data;
+        try {
+          data = await response.json();
+        } catch (parseErr) {
+          console.error('❌ Erro ao fazer parse JSON:', parseErr.message);
+          showAlert(`❌ Resposta inválida do servidor: ${parseErr.message}`, 'error');
+          return;
+        }
+
+        console.log('📋 Resposta:', data);
+
+        if (!response.ok) {
+          showAlert(`❌ Erro ${response.status}: ${data.erro || 'Erro desconhecido'}`, 'error');
+          return;
+        }
+
+        if (!data.token || !data.usuario) {
+          showAlert('❌ Resposta incompleta do servidor, token ou usuário faltando', 'error');
+          return;
+        }
+
+        // ✅ Login bem-sucedido
+        authToken = data.token;
+        currentUser = data.usuario;
+        localStorage.setItem('token', authToken);
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+
+        console.log('✅ Login bem-sucedido!');
+        showAlert(`✅ Bem-vindo, ${currentUser.nome}!`, 'success');
+        
+        setTimeout(() => {
+          loginForm?.reset();
+          showDashboard();
+        }, 1000);
+
+      } catch (err) {
+        console.error('🔴 Erro de conexão:', err);
+        console.error('Nome do erro:', err.name);
+        console.error('Mensagem:', err.message);
+
+        if (err.name === 'AbortError') {
+          showAlert(`⏱️ Timeout! Servidor não respondeu em ${API_TIMEOUT}ms.\n\n⚠️ Verifique se o backend está rodando:\nnode /home/vicente/...../backend/server.js em http://localhost:5000`, 'error');
+        } else {
+          showAlert(`🔴 Erro de conexão: ${err.message}\n\n⚠️ Possíveis causas:\n1. Backend não está rodando\n2. Porta 5000 está bloqueada\n3. Problema de rede\n\n💡 Verifique o console (F12) para mais detalhes`, 'error');
+        }
+      }
+    }
+
+    function showLogin() {
+      loginScreen.classList.add('active');
+      dashboardScreen.classList.remove('active');
+    }
+
+    function showDashboard() {
+      loginScreen.classList.remove('active');
+      dashboardScreen.classList.add('active');
+      dashboardScreen.innerHTML = `
+        <div style="padding: 20px;">
+          <h1>✅ Login bem-sucedido!</h1>
+          <p>Bem-vindo, <strong>${currentUser.name || currentUser.nome}</strong>!</p>
+          <p>Email: ${currentUser.email}</p>
+          <p>Role: ${currentUser.role}</p>
+          <button onclick="handleLogout()" style="padding: 10px 20px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">
+            Logout
+          </button>
+        </div>
+      `;
+    }
+
+    function handleLogout() {
+      authToken = null;
+      currentUser = null;
+      localStorage.removeItem('token');
+      localStorage.removeItem('currentUser');
+      loginForm?.reset();
+      showLogin();
+      showAlert('✅ Desconectado com sucesso', 'success');
+    }
+
+    // Limpar service workers
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for(let registration of registrations) {
+          registration.unregister();
+          console.log('🔄 Service Worker removido');
+        }
+      });
+    }
+
+    // ===== INICIAR QUANDO CARREGAR =====
+    window.addEventListener('load', init);
+  </script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .screen {
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    .login-container {
+      width: 100%;
+      max-width: 400px;
+      padding: 20px;
+    }
+
+    .login-box {
+      background: white;
+      border-radius: 8px;
+      padding: 40px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .logo {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .logo h1 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 28px;
+    }
+
+    .logo p {
+      color: #666;
+      font-size: 14px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #333;
+      font-weight: 500;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+      transition: border-color 0.3s;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+    }
+
+    .password-wrapper {
+      display: flex;
+      align-items: center;
+      position: relative;
+    }
+
+    .password-wrapper input {
+      flex: 1;
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 10px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 18px;
+      padding: 5px 10px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .alert {
+      margin-bottom: 15px;
+    }
+  </style>
+</body>
+</html>
