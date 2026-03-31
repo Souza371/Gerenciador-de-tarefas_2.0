@@ -253,44 +253,109 @@ function handleLogout() {
 }
 
 // ===== SISTEMA DE CHAT AVANÇADO =====
-let usuariosEquipe = [
-  { id: 1, nome: 'João Carlos', avatar: 'JC', role: 'Engenheiro', online: true },
-  { id: 2, nome: 'Carlos Matos', avatar: 'CM', role: 'Técnico', online: true },
-  { id: 3, nome: 'Larissa Andrade', avatar: 'LA', role: 'Coordenadora', online: false },
-  { id: 4, nome: 'Marina Barbosa', avatar: 'MB', role: 'Designer', online: true },
-  { id: 5, nome: 'Ricardo Costa', avatar: 'RC', role: 'Desenvolvedor', online: true }
-];
-
+let usuariosEquipe = []; // Carregado da API
 let conversas = [];
 let conversaAtual = null;
 let mensagensConversa = [];
 let chatGeral = { id: 'geral', nome: 'Chat Geral', tipo: 'geral', mensagens: [] };
 let mensagensNaoLidas = {}; // Track unread messages
 
+// Carregar usuários REAIS da API
+async function carregarUsuariosEquipe() {
+  try {
+    const response = await fetch(`${API_URL}/usuarios/lista/equipe`, {
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    
+    if (response.ok) {
+      const usuarios = await response.json();
+      usuariosEquipe = usuarios.map((u, idx) => ({
+        id: u.id,
+        nome: u.nome,
+        avatar: u.nome.substring(0, 2).toUpperCase(),
+        role: u.role || 'Membro',
+        online: idx % 2 === 0, // Simular alguns online/offline
+        email: u.email
+      }));
+      
+      console.log('✅ Usuários carregados:', usuariosEquipe.length);
+      return usuariosEquipe;
+    } else {
+      console.warn('⚠️ Erro ao carregar usuários, usando lista padrão');
+      return usuariosEquipe;
+    }
+  } catch (err) {
+    console.warn('⚠️ Erro ao conectar API de usuários:', err);
+    return usuariosEquipe;
+  }
+}
+
+// Salvar mensagens no localStorage
+function salvarMensagens() {
+  const chattotal = {
+    geral: chatGeral.mensagens,
+    privadas: conversas.map(c => ({
+      id: c.id,
+      mensagens: c.mensagens
+    }))
+  };
+  localStorage.setItem('chatMensagens', JSON.stringify(chattotal));
+}
+
+// Carregar mensagens do localStorage
+function carregarMensagens() {
+  const saved = localStorage.getItem('chatMensagens');
+  if (saved) {
+    try {
+      const data = JSON.parse(saved);
+      chatGeral.mensagens = data.geral || [];
+      
+      // Restaurar mensagens privadas
+      if (data.privadas) {
+        conversas.forEach((conversa, idx) => {
+          const saved_msgs = data.privadas.find(p => p.id === conversa.id);
+          if (saved_msgs) {
+            conversa.mensagens = saved_msgs.mensagens;
+          }
+        });
+      }
+    } catch (e) {
+      console.warn('Erro ao restaurar mensagens:', e);
+    }
+  }
+}
+
 // Inicializar sistema de chat
-function inicializarChat() {
-  // Inicializar chat geral com algumas mensagens
+async function inicializarChat() {
+  // Carregar usuários reais da API
+  await carregarUsuariosEquipe();
+  
+  // Inicializar chat geral com algumas mensagens padrão
   if (chatGeral.mensagens.length === 0) {
     chatGeral.mensagens = [
-      { tipo: 'other', avatar: 'JC', nome: 'João Carlos', texto: 'Bom dia pessoal! 👋', hora: '08:00', idUser: 1 },
-      { tipo: 'other', avatar: 'CM', nome: 'Carlos Matos', texto: 'L@ pessoal, tudo bem?', hora: '08:15', idUser: 2 },
-      { tipo: 'own', avatar: currentUser.avatar || 'VS', nome: 'Você', texto: 'Ótimo! Novo sistema de chat online! 🎉', hora: '08:30', idUser: currentUser.id }
+      { tipo: 'system', texto: '👋 Bem-vindo ao Chat Geral!', hora: '00:00', idUser: 0 },
+      { tipo: 'system', texto: 'Aqui todos os membros da equipe podem conversar', hora: '00:01', idUser: 0 }
     ];
   }
 
   // Criar conversas privadas automáticas com membros
-  conversas = usuariosEquipe.map(user => ({
-    id: 'privado_' + user.id,
-    tipo: 'privado',
-    userId: user.id,
-    nome: user.nome,
-    avatar: user.avatar,
-    role: user.role,
-    online: user.online,
-    ultimaMensagem: 'Clique para conversar...',
-    hora: '--',
-    mensagens: []
-  }));
+  conversas = usuariosEquipe
+    .filter(u => u.id !== currentUser.id) // Não criar conversa consigo mesmo
+    .map(user => ({
+      id: 'privado_' + user.id,
+      tipo: 'privado',
+      userId: user.id,
+      nome: user.nome,
+      avatar: user.avatar,
+      role: user.role,
+      online: user.online,
+      ultimaMensagem: 'Clique para conversar...',
+      hora: '--',
+      mensagens: []
+    }));
+
+  // Carregar mensagens salvas
+  carregarMensagens();
 
   // Selecionar chat geral por padrão
   selecionarConversa('geral');
@@ -441,20 +506,34 @@ function renderizarMembros(membros) {
 // Renderizar mensagens
 function renderizarMensagens() {
   const container = document.getElementById('chatMessages');
-  container.innerHTML = mensagensConversa.map((msg, idx) => `
-    <div style="display: flex; ${msg.tipo === 'own' ? 'justify-content: flex-end;' : ''} animation: slideIn 0.3s ease;">
-      ${msg.tipo === 'other' ? `
-        <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 11px; flex-shrink: 0; margin-right: 8px;">${msg.avatar}</div>
-      ` : ''}
-      <div style="max-width: 65%;">
-        ${msg.tipo === 'other' ? `<small style="color: #999; font-size: 10px; margin-bottom: 2px; display: block;">${msg.nome}</small>` : ''}
-        <div style="background: ${msg.tipo === 'own' ? 'linear-gradient(135deg, #667eea, #764ba2)' : '#f0f0f0'}; color: ${msg.tipo === 'own' ? 'white' : '#333'}; padding: 10px 14px; border-radius: 12px; word-wrap: break-word;">
-          <div style="font-size: 13px; line-height: 1.4;">${msg.texto}</div>
-          <small style="font-size: 10px; opacity: 0.7; display: block; margin-top: 4px;">${msg.hora}</small>
+  container.innerHTML = mensagensConversa.map((msg, idx) => {
+    // Mensagens do sistema
+    if (msg.tipo === 'system') {
+      return `
+        <div style="display: flex; justify-content: center; margin: 20px 0;">
+          <div style="background: #f0f0f0; color: #666; padding: 10px 15px; border-radius: 12px; font-size: 12px; text-align: center;">
+            ${msg.texto}
+          </div>
+        </div>
+      `;
+    }
+    
+    // Mensagens normais
+    return `
+      <div style="display: flex; ${msg.tipo === 'own' ? 'justify-content: flex-end;' : ''} animation: slideIn 0.3s ease;">
+        ${msg.tipo === 'other' ? `
+          <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 11px; flex-shrink: 0; margin-right: 8px;">${msg.avatar}</div>
+        ` : ''}
+        <div style="max-width: 65%;">
+          ${msg.tipo === 'other' ? `<small style="color: #999; font-size: 10px; margin-bottom: 2px; display: block;">${msg.nome}</small>` : ''}
+          <div style="background: ${msg.tipo === 'own' ? 'linear-gradient(135deg, #667eea, #764ba2)' : '#f0f0f0'}; color: ${msg.tipo === 'own' ? 'white' : '#333'}; padding: 10px 14px; border-radius: 12px; word-wrap: break-word;">
+            <div style="font-size: 13px; line-height: 1.4;">${msg.texto}</div>
+            <small style="font-size: 10px; opacity: 0.7; display: block; margin-top: 4px;">${msg.hora}</small>
+          </div>
         </div>
       </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
   
   container.scrollTop = container.scrollHeight;
 }
@@ -469,23 +548,25 @@ function enviarMensagem() {
   // Adicionar mensagem
   const novaMensagem = {
     tipo: 'own',
-    avatar: 'VS',
+    avatar: currentUser.nome.substring(0, 2).toUpperCase(),
     nome: currentUser.nome,
     texto: texto,
     hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     idUser: currentUser.id
   };
 
-  // Adicionar ao chat
+  // Adicionar ao chat e SALVAR
   if (conversaAtual.tipo === 'geral') {
     chatGeral.mensagens.push(novaMensagem);
-    chatGeral.mensagens[chatGeral.mensagens.length - 1].tipo = 'own';
   } else {
     conversaAtual.mensagens.push(novaMensagem);
     conversaAtual.ultimaMensagem = texto.substring(0, 30) + (texto.length > 30 ? '...' : '');
     conversaAtual.hora = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
 
+  // 💾 SALVAR MENSAGENS NO LOCALSTORAGE
+  salvarMensagens();
+  
   renderizarMensagens();
   input.value = '';
   
@@ -501,7 +582,9 @@ function enviarMensagem() {
     
     const membro = conversaAtual.tipo === 'geral' 
       ? usuariosEquipe[Math.floor(Math.random() * usuariosEquipe.length)]
-      : null;
+      : conversaAtual.tipo === 'privado' 
+        ? usuariosEquipe.find(u => u.id === conversaAtual.userId)
+        : null;
 
     if (membro) {
       const respostaMsg = {
@@ -519,6 +602,8 @@ function enviarMensagem() {
         conversaAtual.mensagens.push(respostaMsg);
       }
 
+      // 💾 SALVAR RESPOSTA TAMBÉM
+      salvarMensagens();
       renderizarMensagens();
     }
   }, 2000);

@@ -17,6 +17,7 @@ router.post('/auth/login', login);
 router.post('/auth/registrar', registrar);
 router.get('/usuario/perfil', verificarToken, obterPerfil);
 router.get('/usuarios', verificarToken, verificarRole(['admin']), listarUsuarios);
+router.get('/usuarios/lista/equipe', verificarToken, listarUsuarios); // Rota pública pra chat
 
 // ====== TAREFAS - CRUD ======
 
