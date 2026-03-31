@@ -252,84 +252,206 @@ function handleLogout() {
   showLogin();
 }
 
-// ===== SISTEMA DE CHAT =====
+// ===== SISTEMA DE CHAT AVANÇADO =====
+let usuariosEquipe = [
+  { id: 1, nome: 'João Carlos', avatar: 'JC', role: 'Engenheiro', online: true },
+  { id: 2, nome: 'Carlos Matos', avatar: 'CM', role: 'Técnico', online: true },
+  { id: 3, nome: 'Larissa Andrade', avatar: 'LA', role: 'Coordenadora', online: false },
+  { id: 4, nome: 'Marina Barbosa', avatar: 'MB', role: 'Designer', online: true },
+  { id: 5, nome: 'Ricardo Costa', avatar: 'RC', role: 'Desenvolvedor', online: true }
+];
+
 let conversas = [];
 let conversaAtual = null;
 let mensagensConversa = [];
+let chatGeral = { id: 'geral', nome: 'Chat Geral', tipo: 'geral', mensagens: [] };
+let mensagensNaoLidas = {}; // Track unread messages
 
-// Simular dados de chat (em produção viriam da API)
+// Inicializar sistema de chat
 function inicializarChat() {
-  conversas = [
-    { id: 1, nome: 'João Carlos', avatar: 'JC', role: 'Engenheiro', online: true, ultimaMensagem: 'Finalizei a inspeção!', hora: '10:30' },
-    { id: 2, nome: 'Carlos Matos', avatar: 'CM', role: 'Técnico', online: true, ultimaMensagem: 'Material chegou...', hora: '10:00' },
-    { id: 3, nome: 'Equipe Reforma Centro', avatar: '👥', role: 'Grupo', online: true, ultimaMensagem: 'Como ficou o andamento...', hora: '09:45' }
-  ];
+  // Inicializar chat geral com algumas mensagens
+  if (chatGeral.mensagens.length === 0) {
+    chatGeral.mensagens = [
+      { tipo: 'other', avatar: 'JC', nome: 'João Carlos', texto: 'Bom dia pessoal! 👋', hora: '08:00', idUser: 1 },
+      { tipo: 'other', avatar: 'CM', nome: 'Carlos Matos', texto: 'L@ pessoal, tudo bem?', hora: '08:15', idUser: 2 },
+      { tipo: 'own', avatar: currentUser.avatar || 'VS', nome: 'Você', texto: 'Ótimo! Novo sistema de chat online! 🎉', hora: '08:30', idUser: currentUser.id }
+    ];
+  }
+
+  // Criar conversas privadas automáticas com membros
+  conversas = usuariosEquipe.map(user => ({
+    id: 'privado_' + user.id,
+    tipo: 'privado',
+    userId: user.id,
+    nome: user.nome,
+    avatar: user.avatar,
+    role: user.role,
+    online: user.online,
+    ultimaMensagem: 'Clique para conversar...',
+    hora: '--',
+    mensagens: []
+  }));
+
+  // Selecionar chat geral por padrão
+  selecionarConversa('geral');
+  renderizarConversas();
+  renderizarUsuariosOnline();
+}
+
+// Renderizar lista de conversas privadas
+function renderizarConversas() {
+  const container = document.getElementById('chatConversations');
+  if (!container) return;
+
+  container.innerHTML = conversas.map(conversa => {
+    const notaoLida = mensagensNaoLidas[conversa.id] || 0;
+    return `
+      <div onclick="selecionarConversa('${conversa.id}')" style="padding: 12px; background: white; border-radius: 6px; cursor: pointer; margin-bottom: 8px; border: 2px solid transparent; transition: all 0.3s; ${conversaAtual?.id === conversa.id ? 'border-color: #667eea; background: #f0f3ff;' : 'hover: border-color: #ddd;'}">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+          <div style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; position: relative;">
+            ${conversa.avatar}
+            <div style="position: absolute; bottom: 0; right: 0; width: 10px; height: 10px; border-radius: 50%; background: ${conversa.online ? '#28a745' : '#999'}; border: 2px solid white;"></div>
+          </div>
+          <div style="flex: 1; min-width: 0;">
+            <div style="font-weight: 600; font-size: 13px;">${conversa.nome}</div>
+            <small style="color: #999; font-size: 10px;">${conversa.role}</small>
+          </div>
+          ${notaoLida > 0 ? `<span style="background: #dc3545; color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold;">${notaoLida}</span>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// Renderizar usuários (todos: online + offline)
+function renderizarUsuariosOnline() {
+  const container = document.getElementById('usuariosOnlineList');
+  if (!container) return;
+
+  const usuariosOnline = usuariosEquipe.filter(u => u.online);
+  const usuariosOffline = usuariosEquipe.filter(u => !u.online);
+
+  let html = '';
+
+  // Seção online
+  if (usuariosOnline.length > 0) {
+    html += usuariosOnline.map(user => `
+      <div onclick="selecionarConversa('privado_${user.id}')" style="padding: 10px; background: #f8f9fa; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: all 0.3s; hover: background: #f0f0f0;">
+        <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 11px; position: relative; flex-shrink: 0;">
+          ${user.avatar}
+          <div style="position: absolute; bottom: -2px; right: -2px; width: 10px; height: 10px; border-radius: 50%; background: #28a745; border: 2px solid white;"></div>
+        </div>
+        <div style="min-width: 0;">
+          <div style="font-size: 12px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${user.nome}</div>
+          <small style="color: #28a745; font-size: 10px;">🟢 Online</small>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // Seção offline
+  if (usuariosOffline.length > 0) {
+    html += `
+      <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e0e0e0;">
+        <small style="font-size: 10px; text-transform: uppercase; color: #999; display: block; margin-bottom: 8px;">⚫ Offline</small>
+    `;
+    
+    html += usuariosOffline.map(user => `
+      <div onclick="selecionarConversa('privado_${user.id}')" style="padding: 10px; background: #f8f9fa; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: all 0.3s; margin-bottom: 8px; hover: background: #f0f0f0;">
+        <div style="width: 32px; height: 32px; border-radius: 50%; background: #ccc; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 11px; position: relative; flex-shrink: 0;">
+          ${user.avatar}
+          <div style="position: absolute; bottom: -2px; right: -2px; width: 10px; height: 10px; border-radius: 50%; background: #999; border: 2px solid white;"></div>
+        </div>
+        <div style="min-width: 0;">
+          <div style="font-size: 12px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #666;">${user.nome}</div>
+          <small style="color: #999; font-size: 10px;">Offline</small>
+        </div>
+      </div>
+    `).join('');
+    
+    html += `</div>`;
+  }
+
+  container.innerHTML = html || '<p style="color: #999; font-size: 12px;">Nenhum usuário disponível</p>';
+}
+
+// Selecionar conversa
+function selecionarConversa(conversaId) {
+  if (conversaId === 'geral') {
+    conversaAtual = chatGeral;
+    mensagensConversa = chatGeral.mensagens;
+    
+    document.getElementById('chatHeaderTitle').textContent = '👥 Chat Geral';
+    document.getElementById('chatHeaderInfo').textContent = 'Todos os membros da equipe podem ver as mensagens';
+    
+    const membros = [
+      { nome: 'Você', avatar: 'VS', role: 'Administrador', online: true },
+      ...usuariosEquipe
+    ];
+    renderizarMembros(membros);
+  } else {
+    const conversa = conversas.find(c => c.id === conversaId);
+    if (!conversa) return;
+
+    conversaAtual = conversa;
+    mensagensConversa = conversa.mensagens;
+    
+    document.getElementById('chatHeaderTitle').textContent = conversa.nome;
+    document.getElementById('chatHeaderInfo').innerHTML = `
+      <span style="display: inline-block; width: 8px; height: 8px; background: ${conversa.online ? '#28a745' : '#999'}; border-radius: 50%; margin-right: 5px;"></span>
+      ${conversa.online ? '🟢 Online agora' : '⚫ Offline'}
+    `;
+    
+    renderizarMembros([
+      { nome: 'Você', avatar: 'VS', role: 'Administrador', online: true },
+      { nome: conversa.nome, avatar: conversa.avatar, role: conversa.role, online: conversa.online }
+    ]);
+
+    // Limpar mensagens não lidas
+    mensagensNaoLidas[conversaId] = 0;
+  }
+
+  renderizarMensagens();
+  document.getElementById('chatInput').disabled = false;
+  document.getElementById('chatSendBtn').disabled = false;
+  document.getElementById('chatInput').focus();
   
   renderizarConversas();
 }
 
-function renderizarConversas() {
-  const container = document.getElementById('chatConversations');
+// Renderizar membros da conversa
+function renderizarMembros(membros) {
+  const container = document.getElementById('chatMembros');
   if (!container) return;
-  
-  container.innerHTML = conversas.map(conversa => `
-    <div onclick="selecionarConversa(${conversa.id})" style="padding: 12px; background: white; border-radius: 6px; cursor: pointer; margin-bottom: 10px; border: 2px solid transparent; transition: all 0.3s; ${conversaAtual?.id === conversa.id ? 'border-color: #667eea; background: #f0f3ff;' : 'hover: border-color: #ddd;'}">
-      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-        <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px;">${conversa.avatar}</div>
-        <div style="flex: 1;">
-          <div style="font-weight: 600; font-size: 14px;">${conversa.nome}</div>
-          <small style="color: #999; font-size: 11px;">${conversa.role}</small>
-        </div>
-        <div style="width: 8px; height: 8px; border-radius: 50%; background: ${conversa.online ? '#28a745' : '#999'};"></div>
+
+  container.innerHTML = membros.map(membro => `
+    <div style="padding: 12px; background: #f8f9fa; border-radius: 6px; display: flex; align-items: center; gap: 10px;">
+      <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; position: relative; flex-shrink: 0;">
+        ${membro.avatar}
+        <div style="position: absolute; bottom: 0; right: 0; width: 10px; height: 10px; border-radius: 50%; background: ${membro.online ? '#28a745' : '#999'}; border: 2px solid white;"></div>
       </div>
-      <small style="color: #999; display: block;">${conversa.ultimaMensagem}</small>
-      <small style="color: #bbb; display: block;">${conversa.hora}</small>
+      <div style="min-width: 0;">
+        <div style="font-size: 13px; font-weight: 600;">${membro.nome}</div>
+        <small style="color: #999; font-size: 11px;">${membro.role}</small>
+      </div>
     </div>
   `).join('');
 }
 
-function selecionarConversa(id) {
-  conversaAtual = conversas.find(c => c.id === id);
-  if (!conversaAtual) return;
-  
-  // Atualizar header
-  const header = document.getElementById('chatHeader');
-  const messages = document.getElementById('chatMessages');
-  
-  header.innerHTML = `
-    <div style="display: flex; align-items: center; gap: 10px;">
-      <div style="width: 45px; height: 45px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px;">${conversaAtual.avatar}</div>
-      <div>
-        <h3 style="margin: 0; font-size: 16px;">${conversaAtual.nome}</h3>
-        <small style="color: #999;">${conversaAtual.online ? '🟢 Online' : '⚫ Offline'}</small>
-      </div>
-    </div>
-  `;
-  
-  // Simular mensagens
-  mensagensConversa = [
-    { tipo: 'other', avatar: conversaAtual.avatar, nome: conversaAtual.nome, texto: 'Oi! Como vai?', hora: '09:00' },
-    { tipo: 'own', avatar: 'VS', nome: 'Você', texto: 'Ótimo! E você?', hora: '09:05' },
-    { tipo: 'other', avatar: conversaAtual.avatar, nome: conversaAtual.nome, texto: conversaAtual.ultimaMensagem, hora: conversaAtual.hora }
-  ];
-  
-  renderizarMensagens();
-  
-  // Habilitar input
-  document.getElementById('chatInput').disabled = false;
-  document.getElementById('chatSendBtn').disabled = false;
-  
-  renderizarConversas();
-}
-
+// Renderizar mensagens
 function renderizarMensagens() {
   const container = document.getElementById('chatMessages');
-  container.innerHTML = mensagensConversa.map(msg => `
-    <div style="display: flex; ${msg.tipo === 'own' ? 'justify-content: flex-end;' : ''} margin-bottom: 15px;">
-      ${msg.tipo === 'other' ? `<div style="width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; flex-shrink: 0; margin-right: 8px;">${msg.avatar}</div>` : ''}
-      <div style="max-width: 70%; background: ${msg.tipo === 'own' ? 'linear-gradient(135deg, #667eea, #764ba2)' : '#f0f0f0'}; color: ${msg.tipo === 'own' ? 'white' : '#333'}; padding: 10px 14px; border-radius: 12px; word-wrap: break-word;">
-        <div style="font-size: 13px;">${msg.texto}</div>
-        <small style="font-size: 11px; opacity: 0.7; display: block; margin-top: 4px;">${msg.hora}</small>
+  container.innerHTML = mensagensConversa.map((msg, idx) => `
+    <div style="display: flex; ${msg.tipo === 'own' ? 'justify-content: flex-end;' : ''} animation: slideIn 0.3s ease;">
+      ${msg.tipo === 'other' ? `
+        <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 11px; flex-shrink: 0; margin-right: 8px;">${msg.avatar}</div>
+      ` : ''}
+      <div style="max-width: 65%;">
+        ${msg.tipo === 'other' ? `<small style="color: #999; font-size: 10px; margin-bottom: 2px; display: block;">${msg.nome}</small>` : ''}
+        <div style="background: ${msg.tipo === 'own' ? 'linear-gradient(135deg, #667eea, #764ba2)' : '#f0f0f0'}; color: ${msg.tipo === 'own' ? 'white' : '#333'}; padding: 10px 14px; border-radius: 12px; word-wrap: break-word;">
+          <div style="font-size: 13px; line-height: 1.4;">${msg.texto}</div>
+          <small style="font-size: 10px; opacity: 0.7; display: block; margin-top: 4px;">${msg.hora}</small>
+        </div>
       </div>
     </div>
   `).join('');
@@ -337,35 +459,69 @@ function renderizarMensagens() {
   container.scrollTop = container.scrollHeight;
 }
 
+// Enviar mensagem
 function enviarMensagem() {
   const input = document.getElementById('chatInput');
   const texto = input.value.trim();
   
   if (!texto || !conversaAtual) return;
-  
-  // Adicionar mensagem à conversa
-  mensagensConversa.push({
+
+  // Adicionar mensagem
+  const novaMensagem = {
     tipo: 'own',
     avatar: 'VS',
-    nome: 'Você',
+    nome: currentUser.nome,
     texto: texto,
-    hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-  });
-  
-  input.value = '';
+    hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    idUser: currentUser.id
+  };
+
+  // Adicionar ao chat
+  if (conversaAtual.tipo === 'geral') {
+    chatGeral.mensagens.push(novaMensagem);
+    chatGeral.mensagens[chatGeral.mensagens.length - 1].tipo = 'own';
+  } else {
+    conversaAtual.mensagens.push(novaMensagem);
+    conversaAtual.ultimaMensagem = texto.substring(0, 30) + (texto.length > 30 ? '...' : '');
+    conversaAtual.hora = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+
   renderizarMensagens();
+  input.value = '';
   
-  // Simular resposta automática após 1 segundo
+  // Simular resposta automática após 2 segundos
   setTimeout(() => {
-    mensagensConversa.push({
-      tipo: 'other',
-      avatar: conversaAtual.avatar,
-      nome: conversaAtual.nome,
-      texto: '👍 Entendi! Vou verificar isso.',
-      hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    });
-    renderizarMensagens();
-  }, 1000);
+    const respostas = [
+      '👍 Entendi!',
+      'Certo, vou verificar isso!',
+      'Excelente! Obrigado pela atualização.',
+      'Combinado! Vou fazer agora.',
+      '✅ Recebido! Vou processar isso.'
+    ];
+    
+    const membro = conversaAtual.tipo === 'geral' 
+      ? usuariosEquipe[Math.floor(Math.random() * usuariosEquipe.length)]
+      : null;
+
+    if (membro) {
+      const respostaMsg = {
+        tipo: 'other',
+        avatar: membro.avatar,
+        nome: membro.nome,
+        texto: respostas[Math.floor(Math.random() * respostas.length)],
+        hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        idUser: membro.id
+      };
+
+      if (conversaAtual.tipo === 'geral') {
+        chatGeral.mensagens.push(respostaMsg);
+      } else {
+        conversaAtual.mensagens.push(respostaMsg);
+      }
+
+      renderizarMensagens();
+    }
+  }, 2000);
 }
 
 // ===== EVENT LISTENERS PARA CHAT =====
@@ -419,7 +575,13 @@ function showLogin() {
 function showDashboard() {
   loginScreen.classList.remove('active');
   dashboardScreen.classList.add('active');
-  userEmail.textContent = currentUser?.email || 'Usuário';
+  userEmail.textContent = currentUser?.nome || 'Usuário';
+  
+  // Mostrar status online
+  const userStatus = document.getElementById('userStatus');
+  if (userStatus) {
+    userStatus.textContent = '🟢 Online';
+  }
 }
 
 function switchSection(section) {
